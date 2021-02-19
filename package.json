@@ -1,0 +1,30 @@
+{
+  "name": "podsostate",
+  "description": "Finite state machine as modern state manager",
+  "author": "Andrey Krasovsky - an.krasowsckij@gmail.com",
+  "license": "MIT",
+  "scripts": {
+    "format:check": "npx prettier --check ./packages"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bre30kra69cs/podsostate.git"
+  },
+  "keywords": [
+    "finite",
+    "state",
+    "machine",
+    "manager"
+  ],
+  "bugs": {
+    "url": "https://github.com/bre30kra69cs/podsostate/issues"
+  },
+  "homepage": "https://github.com/bre30kra69cs/podsostate#readme",
+  "devDependencies": {
+    "prettier": "^2.2.1",
+    "typescript": "^4.1.5"
+  },
+  "workspaces": [
+    "./packages/core"
+  ]
+}

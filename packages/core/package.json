@@ -1,0 +1,15 @@
+{
+  "name": "@podsostate/core",
+  "version": "0.0.0",
+  "description": "Podsostate core",
+  "author": "Andrey Krasovsky - an.krasowsckij@gmail.com",
+  "license": "MIT",
+  "main": "build/index.js",
+  "types": "types/index.d.ts",
+  "scripts": {
+    "build": "npx tsc"
+  },
+  "devDependencies": {
+    "typescript": "^4.1.5"
+  }
+}
