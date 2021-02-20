@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "build",
     "declaration": true,
-    "declarationDir": "types",
+    "declarationDir": "typings",
     "noEmit": false
   },
   "include": ["src"]
