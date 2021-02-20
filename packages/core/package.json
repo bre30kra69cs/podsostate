@@ -2,7 +2,7 @@
   "name": "@podsostate/core",
   "version": "0.0.0",
   "description": "Podsostate core",
-  "author": "Andrey Krasovsky - an.krasowsckij@gmail.com",
+  "author": "Andrey Krasovsky <an.krasowsckij@gmail.com>",
   "license": "MIT",
   "main": "build/index.js",
   "types": "types/index.d.ts",

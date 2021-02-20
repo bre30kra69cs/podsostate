@@ -1,7 +1,7 @@
 {
   "name": "podsostate",
   "description": "Finite state machine as modern state manager",
-  "author": "Andrey Krasovsky - an.krasowsckij@gmail.com",
+  "author": "Andrey Krasovsky <an.krasowsckij@gmail.com>",
   "license": "MIT",
   "scripts": {
     "format:check": "npx prettier --check ./packages"
