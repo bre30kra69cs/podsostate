@@ -1,5 +1,7 @@
 import {check} from '../utils/check';
 
+type Undefinable<T> = T | undefined;
+
 interface MachineEvent {
   getName: () => string;
 }
@@ -16,8 +18,9 @@ interface Transition {
 
 interface MachineNode {
   getName: () => string;
-  getEvents: () => MachineEvent[];
-  send: (event: MachineEvent) => void;
+  getEvent: (eventName: string) => Undefinable<MachineEvent>;
+  getCurrent: () => State;
+  send: (event?: MachineEvent) => void;
 }
 
 interface MachineTools {
@@ -63,7 +66,7 @@ const createMachine = (
 
   const event = (eventName: string): MachineEvent => {
     check([
-      !events.find((event) => event.getName() === eventName),
+      !!events.find((event) => event.getName() === eventName),
       `Machine "${machineName}" must have only uniq events. Event "${eventName}" is duplicated.`,
     ]);
 
@@ -74,7 +77,7 @@ const createMachine = (
 
   const state = (stateName: string): State => {
     check([
-      !states.find((state) => state.getName() === stateName),
+      !!states.find((state) => state.getName() === stateName),
       `Machine "${machineName}" must have only uniq states. State "${stateName}" is duplicated.`,
     ]);
 
@@ -87,22 +90,22 @@ const createMachine = (
     check(
       [
         !states.find((state) => state === stateFrom),
-        `State "stateFrom" of transition "${machineName} not created with machine "state" function".`,
+        `State "stateFrom" of transition "${machineName} not created with machine "state" function.`,
       ],
       [
         !states.find((state) => state === stateTo),
-        `State "stateTo" of transition "${machineName} not created with machine "state" function".`,
+        `State "stateTo" of transition "${machineName} not created with machine "state" function.`,
       ],
       [
         !events.find((event) => event === transitionEvent),
-        `Event of transition "${machineName} not created with machine "event" function".`,
+        `Event transition of machine "${machineName}" not created with machine "event" function.`,
       ],
       [
-        !transitions
-          .filter((transition) => transition.stateFrom.getName() === stateFrom.getName())
-          .filter((transition) => transition.event.getName() === transitionEvent.getName()).length,
-        `Machine "${machineName}" state "${stateFrom.getName()}"
-      must have single transition with event "${transitionEvent.getName()}".`,
+        !!transitions
+          .filter((transition) => transition.stateFrom === stateFrom)
+          .filter((transition) => transition.event === transitionEvent).length,
+        `Machine "${machineName}" state "${stateFrom.getName()}" must have
+        single transition with event "${transitionEvent.getName()}".`,
       ],
     );
 
@@ -113,12 +116,16 @@ const createMachine = (
   const machine = (intiState: State): MachineNode => {
     check([
       !states.find((state) => state === intiState),
-      `Initial state for machine "${machineName} not created with machine "state" function".`,
+      `Initial state for machine "${machineName}" not created with machine "state" function.`,
     ]);
 
     let currentState = intiState;
 
-    const send = (targetEvent: MachineEvent) => {
+    const send = (targetEvent: Undefinable<MachineEvent>) => {
+      if (!targetEvent) {
+        return;
+      }
+
       if (!events.find((event) => event === targetEvent)) {
         return;
       }
@@ -145,13 +152,18 @@ const createMachine = (
       return machineName;
     };
 
-    const getEvents = () => {
-      return [...events];
+    const getEvent = (eventName: string) => {
+      return events.find((event) => event.getName() === eventName);
+    };
+
+    const getCurrent = () => {
+      return currentState;
     };
 
     return {
       getName,
-      getEvents,
+      getEvent,
+      getCurrent,
       send,
     };
   };
@@ -163,3 +175,17 @@ const createMachine = (
     machine,
   });
 };
+
+const testMachine = createMachine('testMachine', ({event, state, transition, machine}) => {
+  const event1 = event('event1');
+  const event2 = event('event2');
+  const state1 = state('state1');
+  const state2 = state('state2');
+  transition(state1, state2, event1);
+  transition(state2, state1, event2);
+  return machine(state1);
+});
+
+console.log(testMachine.getCurrent().getName());
+testMachine.send(testMachine.getEvent('event3'));
+console.log(testMachine.getCurrent().getName());
