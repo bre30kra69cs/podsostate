@@ -1,85 +1,57 @@
-import {createEmitter} from './emitter';
-
-import {compose} from '../utils/compose';
 import {check} from '../utils/check';
 
-enum StepType {
-  All = 'All',
-}
-
-interface Scheme {
+interface MachineEvent {
   name: string;
-  init: string;
-  states: Record<string, any>;
 }
 
-interface Step {
-  type: string;
-  payload: any;
+interface Transition {
+  from: string;
+  to: string;
+  event: MachineEvent;
 }
 
-type Subscriber = (step: Step) => void;
-
-type Machine = {
-  subscribe: (stepType: StepType, subscriber: Subscriber) => void;
-};
-
-type Eventz = any;
-
-type Middleware = (eventer: Eventz) => Eventz;
-
-interface MachineFactoryConfig {
-  middlewares: Middleware[];
+interface MachineNode {
+  name: string;
 }
 
-const prapereMachineFactory = (middleware: Middleware) => {
-  return <T extends Scheme>(scheme: T): Machine => {
-    const {name, init, states} = scheme;
+interface MachineTools {
+  event: (newEvent: MachineEvent) => MachineEvent;
+  transition: (newTransition: Transition) => Transition;
+}
 
-    const initState = states[init];
+const createMachine = (
+  machineName: string,
+  stateConstructor: (tools: MachineTools) => MachineNode,
+): MachineNode => {
+  check([!machineName, `Machine name is required.`]);
 
-    check(
-      [!init, `Not defined "init" value in "${name}" machine.`],
-      [!initState, `No state with "init" name in "${name}" machine.`],
-    );
+  const events: MachineEvent[] = [];
+  const transitions: Transition[] = [];
 
-    const listnerEmitter = createEmitter();
+  const event = (newEvent: MachineEvent): MachineEvent => {
+    check([
+      !events.find((event) => event.name === newEvent.name),
+      `Machine "${machineName}" must have only uniq events. Event "${newEvent.name}" is duplicated.`,
+    ]);
 
-    const subscribe = (stepType: StepType, subscriber: Subscriber) => {
-      listnerEmitter.subscribe(stepType, () => subscriber({} as any));
-    };
-
-    return {
-      subscribe,
-    };
+    events.push(newEvent);
+    return newEvent;
   };
+
+  const transition = (newTransition: Transition): Transition => {
+    check([
+      !transitions
+        .filter((transition) => transition.from === newTransition.from)
+        .filter((transition) => transition.event.name === newTransition.event.name).length,
+      `Machine "${machineName}" state "${newTransition.from}" must have single transition with event "${newTransition.event.name}".`,
+    ]);
+
+    transitions.push(newTransition);
+    return newTransition;
+  };
+
+  return stateConstructor({
+    event,
+    transition,
+  });
 };
-
-const initMachineCreator = (userConfig: Partial<MachineFactoryConfig> = {}) => {
-  const CONFIG: MachineFactoryConfig = {
-    middlewares: [],
-  };
-
-  const {middlewares} = {
-    ...CONFIG,
-    ...userConfig,
-  };
-
-  const middleware = compose(...middlewares);
-
-  const createMachine = prapereMachineFactory(middleware);
-
-  return {
-    createMachine,
-  };
-};
-
-const {createMachine} = initMachineCreator();
-
-const testMchine = createMachine({
-  name: 'test',
-  init: 'test',
-  states: {
-    test: 1,
-  },
-});
