@@ -1,3 +1,5 @@
+let id = 0;
+
 interface MachineEvent {}
 
 const createEvent = (): MachineEvent => {
@@ -6,147 +8,159 @@ const createEvent = (): MachineEvent => {
 
 interface Store {}
 
-type Action<T extends Store> = (store: T) => T;
+type Action<ST extends Store> = (store: ST) => ST;
 
-interface StoreContainer<T extends Store> {
-  store: T;
-  createAction: (action: Action<T>) => Action<T>;
-  createState: <N extends string>(stateScheme: MachineNode<T, N>) => State<T, N>;
+interface MachineNode<ST extends Store, MN extends string> {
+  name: MN;
+  leave: Action<ST>[];
+  entry: Action<ST>[];
 }
 
-const createStore = <T extends Store>(store: T): StoreContainer<T> => {
-  const createAction = (action: Action<T>) => {
+interface State<ST extends Store, SN extends string> extends MachineNode<ST, SN> {
+  type: 'state';
+}
+
+interface Machine<ST extends Store, MN extends string, SN extends string>
+  extends MachineNode<ST, MN> {
+  type: 'machine';
+  getCurrent: () => SN;
+  send: (event: MachineEvent) => void;
+}
+
+interface Scheme<
+  ST extends Store,
+  MN extends string,
+  SN extends string,
+  IN extends SN,
+  TN extends SN
+> {
+  name: MN;
+  init: State<ST, IN>;
+  events: MachineEvent[];
+  states: State<ST, SN>[];
+  transitions: Transition<ST, TN>[];
+}
+
+type CreateAction<ST extends Store> = (action: Action<ST>) => Action<ST>;
+
+type CreateState<ST extends Store> = <MN extends string>(
+  stateScheme: MachineNode<ST, MN>,
+) => State<ST, MN>;
+
+type CreateMachine<ST extends Store> = <
+  MN extends string,
+  SN extends string,
+  IN extends SN,
+  TN extends SN
+>(
+  machineScheme: Scheme<ST, MN, SN, IN, TN>,
+) => Machine<ST, MN, SN>;
+
+interface StoreContainer<ST extends Store> {
+  getStore: () => ST;
+  createAction: CreateAction<ST>;
+  createState: CreateState<ST>;
+  createMachine: CreateMachine<ST>;
+}
+
+const createStore = <ST extends Store>(store: ST): StoreContainer<ST> => {
+  let currentStore = store;
+
+  const getStore = () => {
+    return currentStore;
+  };
+
+  const setStore = (nextStore: ST) => {
+    currentStore = nextStore;
+  };
+
+  const wrapAction = (action: Action<ST>): Action<ST> => {
+    return (prevStore: ST) => {
+      const nextStore = action(prevStore);
+      setStore(nextStore);
+      return nextStore;
+    };
+  };
+
+  const createAction: CreateAction<ST> = (action) => {
     return action;
   };
 
-  const createState = <N extends string>(stateScheme: MachineNode<T, N>): State<T, N> => {
+  const createState: CreateState<ST> = (stateScheme) => {
     return {
       type: 'state',
       name: stateScheme.name,
-      leave: stateScheme.leave,
-      entry: stateScheme.entry,
+      leave: stateScheme.leave.map(wrapAction),
+      entry: stateScheme.entry.map(wrapAction),
+    };
+  };
+
+  const createMachine: CreateMachine<ST> = (machineScheme) => {
+    let currentState = machineScheme.init;
+
+    const getCurrent = () => {
+      return currentState.name;
+    };
+
+    return {
+      type: 'machine',
+      name: machineScheme.name,
+      getCurrent,
+      send: (event) => {},
+      leave: [],
+      entry: [],
     };
   };
 
   return {
-    store,
+    getStore,
     createAction,
     createState,
+    createMachine,
   };
 };
 
-interface Transition<T extends Store, N extends string> {
-  from: MachineNode<T, N>;
-  to: MachineNode<T, N>;
-  // effects: Action<T>[];
+interface Transition<ST extends Store, SN extends string> {
+  from: MachineNode<ST, SN>;
+  to: MachineNode<ST, SN>;
 }
 
-const createTransition = <T extends Store, N extends string>(
-  transitionScheme: Transition<T, N>,
-): Transition<T, N> => {
+const createTransition = <ST extends Store, SN extends string>(
+  transitionScheme: Transition<ST, SN>,
+): Transition<ST, SN> => {
   return {
     from: transitionScheme.from,
     to: transitionScheme.to,
   };
 };
 
-interface MachineNode<T extends Store, N extends string> {
-  name: N;
-  leave: Action<T>[];
-  entry: Action<T>[];
-}
+/**
+ * TEXTURE TEXTURE TEXTURE TEXTURE TEXTURE
+ */
 
-interface State<T extends Store, N extends string> extends MachineNode<T, N> {
-  type: 'state';
-}
+const store = createStore({count: 0});
 
-// const createState = <T extends Store, N extends string>(
-//   stateScheme: MachineNode<T, N>,
-// ): State<T, N> => {
-//   return {
-//     type: 'state',
-//     name: stateScheme.name,
-//     leave: stateScheme.leave,
-//     entry: stateScheme.entry,
-//   };
-// };
-
-interface Machine<T extends Store, N extends string, S extends string> extends MachineNode<T, N> {
-  type: 'machine';
-  getStore: () => T;
-  getCurrent: () => S;
-  send: (event: MachineEvent) => void;
-}
-
-interface Scheme<T extends Store, N extends string, S extends string, IN extends S, TN extends S> {
-  name: N;
-  init: State<T, IN>;
-  store: T;
-  events: MachineEvent[];
-  states: State<T, S>[];
-  transitions: Transition<T, TN>[];
-}
-
-const createMachine = <
-  T extends Store,
-  N extends string,
-  S extends string,
-  IN extends S,
-  TN extends S
->(
-  machineScheme: Scheme<T, N, S, IN, TN>,
-): Machine<T, N, S> => {
-  const store = machineScheme.store;
-  let currentState = machineScheme.init;
-
-  const getStore = () => {
-    return store;
-  };
-
-  const getCurrent = () => {
-    return currentState.name;
-  };
-
-  // const
-
-  return {
-    type: 'machine',
-    name: machineScheme.name,
-    getStore,
-    getCurrent,
-    send: (event) => {},
-    leave: [],
-    entry: [],
-  };
-};
-
-// Textures
-
-const {store, createAction, createState} = createStore({
-  count: 0,
-});
-
-const increment = createAction((state) => ({
+const increment = store.createAction((state) => ({
   count: state.count + 1,
 }));
 
-const decrement = createAction((state) => ({
+const decrement = store.createAction((state) => ({
   count: state.count - 1,
 }));
 
-const state1 = createState({
+const state1 = store.createState({
   name: 'state1',
   entry: [],
   leave: [increment],
 });
 
-const state2 = createState({
+const state2 = store.createState({
   name: 'state2',
   entry: [],
   leave: [decrement],
 });
 
-const state3 = createState({
+const state3 = store.createState({
   name: 'state3',
   entry: [],
   leave: [],
@@ -157,15 +171,36 @@ const transition1 = createTransition({
   to: state3,
 });
 
-const testMachine = createMachine({
+const tm1 = store.createMachine({
   name: 'testMachine',
   init: state3,
-  store,
   events: [],
   states: [state1, state3],
   transitions: [transition1],
 });
 
-const test = testMachine.getCurrent();
+const etm1 = store.createMachine({
+  name: 'testMachine',
+  init: state3,
+  events: [],
+  states: [state1, state2],
+  transitions: [transition1],
+});
 
-// createMachine({})
+const state4 = store.createState({
+  name: 'state3',
+  entry: [],
+  leave: [],
+});
+
+const tm2 = store.createMachine({
+  name: 'testMachine',
+  init: state3,
+  events: [],
+  states: [state1, state4],
+  transitions: [transition1],
+});
+
+const test1 = tm2.getCurrent();
+
+const storeData = store.getStore();
