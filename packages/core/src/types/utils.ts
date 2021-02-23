@@ -1,17 +1,9 @@
-type Func = (...args: any[]) => any;
+import {Func} from './common';
 
-export type MixFunc<TargetFunc extends Func, ParametersMixin extends any[], ReturnMixin> = (
-  ...args: [...Parameters<TargetFunc>, ...ParametersMixin]
-) => ReturnType<TargetFunc> | ReturnMixin;
+export type MixFunc<F extends Func, P extends any[], R> = (
+  ...args: [...Parameters<F>, ...P]
+) => ReturnType<F> | R;
 
-export type MixFuncParameters<TargetFunc extends Func, ParametersMixin extends any[]> = MixFunc<
-  TargetFunc,
-  ParametersMixin,
-  never
->;
+export type MixFuncParameters<F extends Func, P extends any[]> = MixFunc<F, P, never>;
 
-export type MixFuncReturn<TargetFunc extends Func, ReturnMixin> = MixFunc<
-  TargetFunc,
-  never,
-  ReturnMixin
->;
+export type MixFuncReturn<F extends Func, R> = MixFunc<F, never, R>;

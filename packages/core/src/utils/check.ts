@@ -1,8 +1,6 @@
 import {throwError} from './throwError';
 
-type Prediction = [boolean, string?];
-
-export const check = (...predictions: Prediction[]) => {
+export const check = (...predictions: [boolean, string?][]) => {
   predictions.forEach(([show, message]) => {
     if (show) {
       throwError(message);

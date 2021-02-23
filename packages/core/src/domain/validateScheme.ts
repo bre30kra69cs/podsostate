@@ -1,5 +1,6 @@
-import {Scheme, ValidationRule} from '../types/core';
+import {Scheme, ValidationRule, Upgrade} from '../types/core';
 import {throwValidationError} from './throwedErrors';
+import {mergeArr} from '../utils/merge';
 
 const wrapValidationRule = (validationRule: ValidationRule): ValidationRule => {
   return (scheme) => {
@@ -11,14 +12,14 @@ const wrapValidationRule = (validationRule: ValidationRule): ValidationRule => {
   };
 };
 
-export const initStateValidationRule: ValidationRule = (scheme) => {
+const initStateValidationRule: ValidationRule = (scheme) => {
   return [
     scheme.nodes.some((node) => node.name === scheme.init),
     `Init node "${scheme.init}" not in nodes.`,
   ];
 };
 
-export const transitionFromValidationRule: ValidationRule = (scheme) => {
+const transitionFromValidationRule: ValidationRule = (scheme) => {
   const nodesNames = scheme.nodes.map((node) => node.name);
   const transition = scheme.transitions
     .map((transition): [boolean, string] => [nodesNames.includes(transition.from), transition.from])
@@ -30,7 +31,7 @@ export const transitionFromValidationRule: ValidationRule = (scheme) => {
   return [isIncluded, message];
 };
 
-export const transitionToValidationRule: ValidationRule = (scheme) => {
+const transitionToValidationRule: ValidationRule = (scheme) => {
   const nodesNames = scheme.nodes.map((node) => node.name);
   const transition = scheme.transitions
     .map((transition): [boolean, string] => [nodesNames.includes(transition.to), transition.to])
@@ -42,7 +43,7 @@ export const transitionToValidationRule: ValidationRule = (scheme) => {
   return [isIncluded, message];
 };
 
-export const transitionEventValidationRule: ValidationRule = (scheme) => {
+const transitionEventValidationRule: ValidationRule = (scheme) => {
   const transition = scheme.transitions
     .map((transition): [boolean, string] => [
       scheme.events.includes(transition.event),
@@ -56,7 +57,24 @@ export const transitionEventValidationRule: ValidationRule = (scheme) => {
   return [isIncluded, message];
 };
 
-export const validateScheme = (scheme: Scheme) => {
-  const wrappedRules = scheme.validationRules.map(wrapValidationRule);
-  wrappedRules.forEach((rule) => rule(scheme));
+export const validateScheme = (scheme: Scheme, validationRules: ValidationRule[] = []) => {
+  validationRules.map(wrapValidationRule).forEach((rule) => rule(scheme));
+};
+
+export const validationUpgrade: Upgrade = (config) => {
+  return {
+    ...config,
+    validationRules: mergeArr(
+      config.validationRules,
+      [
+        initStateValidationRule,
+        transitionFromValidationRule,
+        transitionToValidationRule,
+        transitionEventValidationRule,
+      ],
+      {
+        order: 'before',
+      },
+    ),
+  };
 };

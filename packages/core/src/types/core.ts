@@ -1,4 +1,4 @@
-type MachineEvent = string;
+type ExternalEvent = string;
 
 type MachineNodeName = string;
 
@@ -19,16 +19,39 @@ type MachineOrState = State | Machine;
 interface Transition {
   from: MachineNodeName;
   to: MachineNodeName;
-  event: MachineEvent;
+  event: ExternalEvent;
 }
+
+interface InnerEvent {}
+
+interface InnerNodeEvent extends InnerEvent {
+  type: 'node';
+  stage: 'leave' | 'enter';
+  name: MachineNodeName;
+}
+
+interface InnerTransitioEvent {
+  type: 'transition';
+  stage: 'start' | 'active' | 'end';
+  from: MachineNodeName;
+  to: MachineNodeName;
+}
+
+type InnerNodeOrTransitioEvent = InnerNodeEvent | InnerTransitioEvent;
 
 export type ValidationRule = (scheme: Scheme) => [boolean, string?];
 
 export interface Scheme {
   name: MachineNodeName;
   init: MachineNodeName;
-  events: MachineEvent[];
+  events: ExternalEvent[];
   nodes: MachineOrState[];
   transitions: Transition[];
-  validationRules: ValidationRule[];
+}
+
+export type Upgrade = (config: MachineFabricConfig) => MachineFabricConfig;
+
+export interface MachineFabricConfig {
+  upgrades?: Upgrade[];
+  validationRules?: ValidationRule[];
 }

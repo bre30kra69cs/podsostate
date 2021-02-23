@@ -1,9 +1,19 @@
 import {check} from '../utils/check';
-import {compose} from '../utils/compose';
-import {validateScheme} from './validateScheme';
+import {pipe} from '../utils/compose';
+import {validateScheme, validationUpgrade} from './validateScheme';
+import {MachineFabricConfig, Scheme} from '../types/core';
+import {mergeArr} from '../utils/merge';
 
-import {Scheme} from '../types/core';
+const createMachineFabric = <T extends MachineFabricConfig>(config: T) => {
+  const upgrades = mergeArr(config?.upgrades, [validationUpgrade], {
+    order: 'before',
+  });
+  const upgradeConfigPipe = pipe(upgrades);
+  const upgradedConfig = upgradeConfigPipe(config);
 
-const createFabric = <T extends Scheme>(scheme: T) => {
-  validateScheme(scheme);
+  const createMachine = <T extends Scheme>(scheme: T) => {
+    validateScheme(scheme, upgradedConfig.validationRules);
+  };
+
+  return {createMachine};
 };
