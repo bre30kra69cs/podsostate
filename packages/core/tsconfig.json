@@ -2,8 +2,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "build",
-    "declaration": true,
-    "declarationDir": "typings",
+    // "declaration": true,
+    // "declarationDir": "typings",
     "noEmit": false
   },
   "include": ["src"]

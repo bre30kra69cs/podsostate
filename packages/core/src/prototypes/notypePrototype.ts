@@ -202,29 +202,29 @@ const transition2 = store.createTransition({
   event: event2,
 });
 
-const etm0 = store.createMachine({
-  name: 'testMachine',
-  init: state3,
-  events: [event2],
-  states: [state1, state3],
-  transitions: [transition1], // event1 is not in machine scheme and we have error
-});
+// const etm0 = store.createMachine({
+//   name: 'testMachine',
+//   init: state3,
+//   events: [event2],
+//   states: [state1, state3],
+//   transitions: [transition1], // event1 is not in machine scheme and we have error
+// });
 
-const etm1 = store.createMachine({
-  name: 'testMachine',
-  init: state2,
-  events: [],
-  states: [state1, state2],
-  transitions: [transition1], // state3 is not in machine scheme and we have error
-});
+// const etm1 = store.createMachine({
+//   name: 'testMachine',
+//   init: state2,
+//   events: [],
+//   states: [state1, state2],
+//   transitions: [transition1], // state3 is not in machine scheme and we have error
+// });
 
-const etm2 = store.createMachine({
-  name: 'testMachine',
-  init: state3, // state3 is not in machine scheme and we have error
-  events: [],
-  states: [state1, state2],
-  transitions: [],
-});
+// const etm2 = store.createMachine({
+//   name: 'testMachine',
+//   init: state3, // state3 is not in machine scheme and we have error
+//   events: [],
+//   states: [state1, state2],
+//   transitions: [],
+// });
 
 const state4 = store.createState({
   name: 'state3',
