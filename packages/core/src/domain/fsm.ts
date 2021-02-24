@@ -46,18 +46,16 @@ const validateFsm = (scheme: FSMScheme) => {
   determinationCheck();
 };
 
-interface FSM {
+export interface FSM {
   send: (event: string) => void;
   subscribe: (subscriber: Subscriber) => void;
   unsubscribe: (subscriber: Subscriber) => void;
 }
 
-const EVENT = 'FSM_BUS';
-
 export const createFsm = (scheme: FSMScheme): FSM => {
-  const {init, transitions} = scheme;
-  validateFsm(scheme);
+  const {init, events, transitions} = scheme;
   let $current = init;
+  validateFsm(scheme);
   const emitter = createEmitter();
 
   const getTransition = (event: string) => {
@@ -72,15 +70,20 @@ export const createFsm = (scheme: FSMScheme): FSM => {
     if (transition) {
       const [, , to] = transition;
       $current = to;
+      emitter.emit($current);
     }
   };
 
   const subscribe = (subscriber: Subscriber) => {
-    emitter.subscribe(EVENT, subscriber);
+    events.forEach(($event) => {
+      emitter.subscribe($event, subscriber);
+    });
   };
 
   const unsubscribe = (subscriber: Subscriber) => {
-    emitter.unsubscribe(EVENT, subscriber);
+    events.forEach(($event) => {
+      emitter.unsubscribe($event, subscriber);
+    });
   };
 
   return {

@@ -1,4 +1,4 @@
-export type Subscriber = () => void;
+export type Subscriber = (event: string) => void;
 
 export const createEmitter = () => {
   let $subscribers: [string, Subscriber][] = [];
@@ -21,7 +21,7 @@ export const createEmitter = () => {
   const emit = (event: string) => {
     $subscribers.forEach(([$event, $subscriber]) => {
       if ($event === event) {
-        $subscriber();
+        $subscriber(event);
       }
     });
   };
