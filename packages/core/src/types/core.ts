@@ -1,57 +1,30 @@
-type ExternalEvent = string;
+export type Subscriber = (event: string) => void;
 
-type MachineNodeName = string;
-
-interface MachineNode {
-  name: MachineNodeName;
+export interface FSM {
+  send: (event: string) => void;
+  subscribe: (subscriber: Subscriber) => void;
+  unsubscribe: (subscriber: Subscriber) => void;
 }
 
-interface State extends MachineNode {
-  type: 'state';
+export interface Transition {
+  from: string;
+  to: string;
+  event: string;
 }
 
-interface Machine extends MachineNode {
-  type: 'machine';
-}
-
-type MachineOrState = State | Machine;
-
-interface Transition {
-  from: MachineNodeName;
-  to: MachineNodeName;
-  event: ExternalEvent;
-}
-
-interface InnerEvent {}
-
-interface InnerNodeEvent extends InnerEvent {
-  type: 'node';
-  stage: 'leave' | 'enter';
-  name: MachineNodeName;
-}
-
-interface InnerTransitioEvent {
-  type: 'transition';
-  stage: 'start' | 'active' | 'end';
-  from: MachineNodeName;
-  to: MachineNodeName;
-}
-
-type InnerNodeOrTransitioEvent = InnerNodeEvent | InnerTransitioEvent;
-
-export type ValidationRule = (scheme: Scheme) => [boolean, string?];
-
-export interface Scheme {
-  name: MachineNodeName;
-  init: MachineNodeName;
-  events: ExternalEvent[];
-  nodes: MachineOrState[];
+export interface FSMScheme {
+  init: string;
+  events: string[];
+  states: string[];
   transitions: Transition[];
 }
 
-export type Upgrade = (config: MachineFabricConfig) => MachineFabricConfig;
+type Action = () => void;
 
-export interface MachineFabricConfig {
-  upgrades?: Upgrade[];
-  validationRules?: ValidationRule[];
+export interface ActionTransition extends Transition {
+  action: Action;
+}
+
+export interface ActionFSMScheme extends FSMScheme {
+  transitions: ActionTransition[];
 }

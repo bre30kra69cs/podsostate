@@ -1,4 +1,4 @@
-export type Subscriber = (event: string) => void;
+import {Subscriber} from '../types/core';
 
 export const createEmitter = () => {
   let $subscribers: [string, Subscriber][] = [];
