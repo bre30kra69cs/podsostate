@@ -1,30 +1,36 @@
 export type Subscriber = (event: string) => void;
 
-export interface FSM {
-  send: (event: string) => void;
-  subscribe: (subscriber: Subscriber) => void;
-  unsubscribe: (subscriber: Subscriber) => void;
-}
+type Action = () => void;
 
-export interface Transition {
+interface Transition {
   from: string;
   to: string;
   event: string;
 }
 
-export interface FSMScheme {
-  init: string;
-  events: string[];
-  states: string[];
-  transitions: Transition[];
-}
+type ActionStrategy = 'forward' | 'reverse' | 'throwing';
 
-type Action = () => void;
-
-export interface ActionTransition extends Transition {
+interface StateAction {
+  strategy: ActionStrategy;
   action: Action;
 }
 
-export interface ActionFSMScheme extends FSMScheme {
-  transitions: ActionTransition[];
+interface State {
+  name: string;
+  leave: StateAction;
+  enter: StateAction;
+  core: StateAction;
+}
+
+export interface FSMScheme {
+  init: string;
+  events: string[];
+  states: State[];
+  transitions: Transition[];
+}
+
+export interface FSM {
+  send: (event: string) => void;
+  subscribe: (subscriber: Subscriber) => void;
+  unsubscribe: (subscriber: Subscriber) => void;
 }
