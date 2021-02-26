@@ -1,6 +1,6 @@
 import {createPrimitiveFsm, PrimitiveFSM, PrimitiveFSMSubscriber} from './primitiveFsm';
 import {createOrthogonalPrimitiveFsm} from './primitiveOrthogonalFsm';
-import {compareStates} from '../utils/compare';
+import {compareStates} from '../../utils/compare';
 
 type Activity = () => Promise<void>;
 
