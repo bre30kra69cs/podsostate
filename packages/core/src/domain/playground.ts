@@ -1,50 +1,42 @@
 type Func = () => void;
 
-interface Action {
-  throwStrategy: 'forward' | 'reverse' | 'throw';
-  action: Func;
+interface FsmScheme<E, TE, S, IS, TS> {
+  init: IS;
+  events: E[];
+  states: S[];
+  transitions: {
+    from: TS;
+    event: TE;
+    to: TS;
+    guard: (current: TS, event: TE) => boolean;
+    action: (current: TS, event: TE) => void;
+  }[];
 }
 
-interface Transition<S extends string> {
-  to: S;
-  invoke: Action;
-}
-
-type State<S extends string> = {
-  [K in string]: Transition<S>;
-};
-
-interface FsmScheme<S extends string, P extends string> {
-  init: P;
-  states: {
-    [K in S]: State<P>;
-  };
-}
-
-const validateScheme = <S extends string, P extends S>(scheme: FsmScheme<S, P>) => {
+const createFsm = <E extends string, TE extends E, S extends string, IS extends S, TS extends S>(
+  scheme: FsmScheme<E, TE, S, IS, TS>,
+) => {
   return scheme;
 };
 
-const test = validateScheme({
-  init: 'off',
-  states: {
-    off: {
-      switchOff: {
-        to: 'on',
-        invoke: {
-          throwStrategy: 'forward',
-          action: () => {},
-        },
-      },
+const test = createFsm({
+  init: 'on',
+  events: ['switchOff', 'switchOn'],
+  states: ['on', 'off'],
+  transitions: [
+    {
+      from: 'on',
+      event: 'switchOff',
+      to: 'off',
+      guard: () => true,
+      action: () => {},
     },
-    on: {
-      switchOn: {
-        to: 'on',
-        invoke: {
-          throwStrategy: 'forward',
-          action: () => {},
-        },
-      },
+    {
+      from: 'off',
+      event: 'switchOn',
+      to: 'on',
+      guard: () => true,
+      action: () => {},
     },
-  },
+  ],
 });
