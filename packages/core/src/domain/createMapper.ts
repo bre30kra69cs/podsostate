@@ -6,7 +6,7 @@ export const createMapper = <K, V>() => {
   };
 
   const saveSet = (key: K, value: V) => {
-    if (map.has(key)) {
+    if (!map.has(key)) {
       unsaveSet(key, value);
     }
   };

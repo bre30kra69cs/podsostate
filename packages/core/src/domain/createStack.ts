@@ -1,4 +1,4 @@
-import {isNumber} from '../utils/check';
+import {isNumber} from '../utils/typers';
 import {mergeConfig} from '../utils/merge';
 
 interface StackConfig {

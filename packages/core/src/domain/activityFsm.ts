@@ -2,7 +2,7 @@ import {createFsm, Fsm} from './createFsm';
 
 type Activity = () => Promise<void>;
 
-export const activityFsm = (activity: Activity) => {
+export const createActivityFsm = (activity: Activity) => {
   const waitFsm = createFsm({
     init: 'start',
     events: ['LOAD', 'END'],
