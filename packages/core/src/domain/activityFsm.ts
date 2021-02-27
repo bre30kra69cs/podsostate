@@ -20,7 +20,21 @@ export const activityFsm = (activity: Activity) => {
       },
     ],
   });
-  const flowFms = createFsm({
+  const wrappedActivity = () => {
+    waitFsm.send('LOAD');
+    const wrapped = async () => {
+      try {
+        await activity();
+        waitFsm.send('END');
+        flowFsm.send('END');
+      } catch {
+        waitFsm.send('END');
+        flowFsm.send('ERROR');
+      }
+    };
+    wrapped();
+  };
+  const flowFsm = createFsm({
     init: 'start',
     events: ['LOAD', 'ERROR', 'END'],
     states: ['start', 'load', 'error', 'end'],
@@ -29,6 +43,7 @@ export const activityFsm = (activity: Activity) => {
         from: 'start',
         event: 'LOAD',
         to: 'load',
+        action: () => wrappedActivity(),
       },
       {
         from: 'load',
@@ -44,19 +59,5 @@ export const activityFsm = (activity: Activity) => {
       },
     ],
   });
-
-  const wrappedActivity = async () => {
-    try {
-      waitFsm.send('LOAD');
-      await activity();
-    } finally {
-      waitFsm.send('END');
-    }
-  };
-
-  const send = (event: string) => {
-    if (event === 'start') {
-      flowFms.send('LOAD');
-    }
-  };
+  return flowFsm;
 };
