@@ -2,6 +2,7 @@ import {createPushStack} from './createStack';
 import {createEmitter, Subscriber} from './createEmitter';
 import {createMapper} from './createMapper';
 import {isTruly} from '../utils/typers';
+import {pipe} from '../utils/compose';
 
 interface Transition {
   from: string;
@@ -109,5 +110,24 @@ export const createFsm = ({init, transitions}: FsmScheme): Fsm => {
     current,
     subscribe,
     unsubscribe,
+  };
+};
+
+type FsmFabricPlugin = (scheme: FsmScheme) => FsmScheme;
+
+interface FsmFabricConfig {
+  plugins: FsmFabricPlugin[];
+}
+
+export const createFsmFabric = (config: FsmFabricConfig) => {
+  const prepareScheme = pipe(config.plugins);
+
+  const fsmFabric = (sourceScheme: FsmScheme) => {
+    const scheme = prepareScheme(sourceScheme);
+    return createFsm(scheme);
+  };
+
+  return {
+    fsmFabric,
   };
 };

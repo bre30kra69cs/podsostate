@@ -6,6 +6,6 @@
     // "declarationDir": "typings",
     "noEmit": false
   },
-  "exclude": ["src/prototypes0"],
+  "exclude": ["src/prototypes0", "src/prototypes1"],
   "include": ["src"]
 }
