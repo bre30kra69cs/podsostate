@@ -3,66 +3,57 @@ import {createEmitter, Subscriber} from './createEmitter';
 import {createMapper} from './createMapper';
 import {isTruly} from '../utils/typers';
 
-interface Transition<TE, TS> {
-  from: TS;
-  event: TE;
-  to: TS;
+interface Transition {
+  from: string;
+  event: string;
+  to: string;
   actionOrder?: 'before' | 'after';
-  guard?: (from: TS, event: TE) => boolean;
-  action?: (from: TS, event: TE) => void;
+  guard?: (from: string, event: string) => boolean;
+  action?: (from: string, event: string) => void;
 }
 
-interface FsmScheme<E, TE, S, IS, TS> {
-  init: IS;
-  events: E[];
-  states: S[];
-  transitions: (Transition<TE, TS> | false)[];
+interface FsmScheme {
+  init: string;
+  events: string[];
+  states: string[];
+  transitions: Transition[];
 }
 
-type FsmSubscriber<E, S> = (from: S, event: E, to: S) => void;
+type FsmSubscriber = (from: string, event: string, to: string) => void;
 
-export interface Fsm<E, S> {
-  send: (event: E) => void;
-  current: () => S;
-  subscribe: (subscriber: FsmSubscriber<E, S>) => void;
-  unsubscribe: (subscriber: FsmSubscriber<E, S>) => void;
+export interface Fsm {
+  send: (event: string) => void;
+  current: () => string;
+  subscribe: (subscriber: FsmSubscriber) => void;
+  unsubscribe: (subscriber: FsmSubscriber) => void;
 }
 
 const EVENT = 'FSM_BUS_EVENT';
 
-export const createFsm = <
-  E extends string,
-  TE extends E,
-  S extends string,
-  IS extends S,
-  TS extends S
->({
-  init,
-  transitions,
-}: FsmScheme<E, TE, S, IS, TS>): Fsm<E, S> => {
-  const stack = createPushStack<S>({limit: 2});
-  const emitter = createEmitter<[S, E, S]>();
-  const mapper = createMapper<FsmSubscriber<E, S>, Subscriber<[S, E, S]>>();
+export const createFsm = ({init, transitions}: FsmScheme): Fsm => {
+  const stack = createPushStack<string>({limit: 2});
+  const emitter = createEmitter<[string, string, string]>();
+  const mapper = createMapper<FsmSubscriber, Subscriber<[string, string, string]>>();
   stack.push(init);
 
-  const push = (from: TS, event: TE, to: TS) => {
+  const push = (from: string, event: string, to: string) => {
     stack.push(to);
     emitter.emit(EVENT, [from, event, to]);
   };
 
   const getCurrent = () => {
-    return stack.head() as S;
+    return stack.head() as string;
   };
 
-  const getTransition = (event: E) => {
+  const getTransition = (event: string) => {
     const current = getCurrent();
     return transitions.filter(isTruly).find((transition) => {
-      const $transition = transition as Transition<TE, TS>;
+      const $transition = transition as Transition;
       return $transition.event === event && $transition.from === current;
     });
   };
 
-  const guradCheck = (transition: Transition<TE, TS>, payload: () => void) => {
+  const guradCheck = (transition: Transition, payload: () => void) => {
     const {from, event, guard} = transition;
     if (guard) {
       if (guard(from, event)) {
@@ -73,7 +64,7 @@ export const createFsm = <
     }
   };
 
-  const send = (event: E) => {
+  const send = (event: string) => {
     const transition = getTransition(event);
     if (transition) {
       const {from, to, event: $event, action, actionOrder} = transition;
@@ -96,8 +87,8 @@ export const createFsm = <
     return getCurrent();
   };
 
-  const subscribe = (subscriber: FsmSubscriber<E, S>) => {
-    const wrapped = (event: string, [from, $event, to]: [S, E, S]) => {
+  const subscribe = (subscriber: FsmSubscriber) => {
+    const wrapped = (event: string, [from, $event, to]: [string, string, string]) => {
       subscriber(from, $event, to);
     };
 
@@ -105,7 +96,7 @@ export const createFsm = <
     emitter.subscribe(EVENT, memorizedWrapper);
   };
 
-  const unsubscribe = (subscriber: FsmSubscriber<E, S>) => {
+  const unsubscribe = (subscriber: FsmSubscriber) => {
     const memorizedWrapper = mapper.get(subscriber);
     if (memorizedWrapper) {
       emitter.unsubscribe(EVENT, memorizedWrapper);
