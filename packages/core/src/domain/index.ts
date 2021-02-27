@@ -3,11 +3,13 @@ import {wait} from '../utils/wait';
 import {createTransitionFsm} from './transitionFsm';
 
 const action = () => {
-  throw new Error('test error1');
+  // throw new Error('test error1');
 };
 
 const activity = async () => {
+  transitionFsm.send('END');
   await wait(3000);
+  console.log(1);
   throw new Error('test error2');
 };
 
