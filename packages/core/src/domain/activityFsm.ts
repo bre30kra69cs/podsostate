@@ -1,27 +1,27 @@
-import {createFsm, Fsm} from './createFsm';
+import {createFsm} from './createFsm';
 
-type Activity = () => Promise<void>;
+export type Activity = () => Promise<void>;
 
 export const createActivityFsm = (activity: Activity) => {
   const waitFsm = createFsm({
     init: 'start',
-    events: ['LOAD', 'END'],
-    states: ['start', 'load', 'end'],
+    events: ['WAIT', 'END'],
+    states: ['start', 'wait', 'end'],
     transitions: [
       {
         from: 'start',
-        event: 'LOAD',
-        to: 'load',
+        event: 'WAIT',
+        to: 'wait',
       },
       {
-        from: 'load',
+        from: 'wait',
         event: 'END',
         to: 'end',
       },
     ],
   });
   const wrappedActivity = () => {
-    waitFsm.send('LOAD');
+    waitFsm.send('WAIT');
     const wrapped = async () => {
       try {
         await activity();
@@ -36,23 +36,24 @@ export const createActivityFsm = (activity: Activity) => {
   };
   const flowFsm = createFsm({
     init: 'start',
-    events: ['LOAD', 'ERROR', 'END'],
-    states: ['start', 'load', 'error', 'end'],
+    events: ['WAIT', 'ERROR', 'END'],
+    states: ['start', 'wait', 'error', 'end'],
     transitions: [
       {
         from: 'start',
-        event: 'LOAD',
-        to: 'load',
+        event: 'WAIT',
+        to: 'wait',
+        actionOrder: 'after',
         action: () => wrappedActivity(),
       },
       {
-        from: 'load',
+        from: 'wait',
         event: 'ERROR',
         to: 'error',
         guard: () => waitFsm.current() === 'end',
       },
       {
-        from: 'load',
+        from: 'wait',
         event: 'END',
         to: 'end',
         guard: () => waitFsm.current() === 'end',

@@ -15,15 +15,12 @@ export const createMapper = <K, V>() => {
     return map.get(key);
   };
 
-  const set = (key: K, value: V, strategy: 'replace' | 'save' = 'replace') => {
-    if (strategy === 'replace') {
+  const set = (key: K, value: V, strategy: 'unsave' | 'save' = 'unsave') => {
+    if (strategy === 'unsave') {
       unsaveSet(key, value);
-    }
-
-    if (strategy === 'save') {
+    } else if (strategy === 'save') {
       saveSet(key, value);
     }
-
     return get(key) as V;
   };
 

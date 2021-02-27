@@ -1,18 +1,22 @@
 import {createPushStack} from './createStack';
 import {createEmitter, Subscriber} from './createEmitter';
 import {createMapper} from './createMapper';
+import {isTruly} from '../utils/typers';
+
+interface Transition<TE, TS> {
+  from: TS;
+  event: TE;
+  to: TS;
+  actionOrder?: 'before' | 'after';
+  guard?: (from: TS, event: TE) => boolean;
+  action?: (from: TS, event: TE) => void;
+}
 
 interface FsmScheme<E, TE, S, IS, TS> {
   init: IS;
   events: E[];
   states: S[];
-  transitions: {
-    from: TS;
-    event: TE;
-    to: TS;
-    guard?: (from: TS, event: TE) => boolean;
-    action?: (from: TS, event: TE) => void;
-  }[];
+  transitions: (Transition<TE, TS> | false)[];
 }
 
 type FsmSubscriber<E, S> = (from: S, event: E, to: S) => void;
@@ -52,24 +56,39 @@ export const createFsm = <
 
   const getTransition = (event: E) => {
     const current = getCurrent();
-    return transitions.find((transition) => {
-      return transition.event === event && transition.from === current;
+    return transitions.filter(isTruly).find((transition) => {
+      const $transition = transition as Transition<TE, TS>;
+      return $transition.event === event && $transition.from === current;
     });
+  };
+
+  const guradCheck = (transition: Transition<TE, TS>, payload: () => void) => {
+    const {from, event, guard} = transition;
+    if (guard) {
+      if (guard(from, event)) {
+        payload();
+      }
+    } else {
+      payload();
+    }
   };
 
   const send = (event: E) => {
     const transition = getTransition(event);
     if (transition) {
-      const {from, to, event: $event, action} = transition;
-      if (transition?.guard) {
-        if (transition.guard(from, $event)) {
+      const {from, to, event: $event, action, actionOrder} = transition;
+      guradCheck(transition, () => {
+        if (actionOrder === 'before') {
+          action?.(from, $event);
+          push(from, $event, to);
+        } else if (actionOrder === 'after') {
+          push(from, $event, to);
+          action?.(from, $event);
+        } else {
           action?.(from, $event);
           push(from, $event, to);
         }
-      } else {
-        action?.(from, $event);
-        push(from, $event, to);
-      }
+      });
     }
   };
 
