@@ -1,24 +1,18 @@
 type Emit = (event: string) => void;
 
-type StateAction = (emit: Emit) => void;
+type Action = (emit: Emit) => void;
 
-type StateActivity = (emit: Emit) => Promise<void>;
-
-type TransitionAction = () => void;
-
-type TransitionActivity = () => Promise<void>;
+type AsyncAction = (emit: Emit) => Promise<void>;
 
 type Guard = () => boolean;
 
-interface TransitionEffect {
-  strategy?: 'forward' | 'reverse';
-  action?: TransitionAction;
-  activity?: TransitionActivity;
+interface Effect {
+  action?: Action;
+  asyncAction?: AsyncAction;
 }
 
-interface StateEffect {
-  action?: StateAction;
-  activity?: StateActivity;
+interface TransitionEffect extends Effect {
+  strategy?: 'forward' | 'reverse';
 }
 
 interface FsmTransition {
@@ -27,11 +21,16 @@ interface FsmTransition {
   guard?: Guard;
 }
 
+export interface Fsm {
+  send: (event: string) => void;
+  current: () => string;
+}
+
 export interface FsmState {
   transitions: Record<string, FsmTransition>;
-  enter?: StateEffect;
-  leave?: StateEffect;
-  invoke?: StateEffect;
+  enter?: Effect;
+  leave?: Effect;
+  invoke?: Effect;
 }
 
 export type FsmNode = FsmState | FsmScheme | FsmScheme[];
@@ -44,18 +43,8 @@ export interface FsmScheme {
   states: Record<string, FsmNode>;
 }
 
-export const createScheme = (scheme: FsmScheme) => scheme;
-
-export const isStateScheme = (value?: any): value is FsmState => {
-  return !!value?.transitions;
-};
-
-export const isMachineScheme = (value?: any): value is FsmScheme => {
-  return !!value?.states;
-};
-
-export const isParallelScheme = (value?: any): value is FsmScheme[] => {
-  return Array.isArray(value);
+export const createScheme = (scheme: FsmScheme) => {
+  return scheme;
 };
 
 const testScheme = createScheme({
