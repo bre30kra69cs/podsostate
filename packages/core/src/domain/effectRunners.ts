@@ -39,15 +39,10 @@ export const runAsyncAction = (config: AsyncActionRunnerConfig) => {
   wrapped();
 };
 
-interface HeardRunnerConfig {
-  core: AsyncAction;
-  resolve?: Action;
-  reject?: Action;
-}
-
-export const createHeartRunner = (config: HeardRunnerConfig) => async () => {
+export const createAsyncActionRunner = (config: AsyncActionRunnerConfig) => async () => {
+  config.start?.();
   try {
-    await config.core();
+    await config.asyncAction();
     config.resolve?.();
   } catch {
     config.reject?.();

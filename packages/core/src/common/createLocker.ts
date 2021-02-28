@@ -16,7 +16,7 @@ export const createLocker = (init: boolean = true) => {
     return unlocked;
   };
 
-  const current = () => {
+  const isUnlocked = () => {
     return unlocked;
   };
 
@@ -24,6 +24,6 @@ export const createLocker = (init: boolean = true) => {
     lock,
     unlock,
     reverse,
-    current,
+    isUnlocked,
   };
 };

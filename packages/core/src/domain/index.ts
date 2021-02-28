@@ -9,4 +9,7 @@ const test = async () => {
 
 const {startEvent, container} = createTransition(test);
 
+container.subscribe(console.log);
+
+container.send(startEvent);
 container.send(startEvent);

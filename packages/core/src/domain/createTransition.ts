@@ -3,20 +3,25 @@ import {
   createFsmContainer,
   createFsmEvent,
   createFsmState,
+  FsmEvent,
+  FsmContainer,
 } from './createFsmElements';
-import {createHeartRunner, AsyncAction} from './effectRunners';
+import {createAsyncActionRunner, AsyncAction} from './effectRunners';
 
-export const createTransition = (asyncAction: AsyncAction) => {
+export interface Transition {
+  startEvent: FsmEvent;
+  container: FsmContainer;
+}
+
+export const createTransition = (asyncAction: AsyncAction): Transition => {
   const startEvent = createFsmEvent();
   const doneEvent = createFsmEvent();
   const failEvent = createFsmEvent();
   const initState = createFsmState();
   const loadingState = createFsmState({
-    heart: createHeartRunner({
-      core: asyncAction,
-      resolve: () => container.send(doneEvent),
-      reject: () => container.send(failEvent),
-    }),
+    heart: asyncAction,
+    resolve: () => container.send(doneEvent),
+    reject: () => container.send(failEvent),
   });
   const doneState = createFsmState();
   const failState = createFsmState();
