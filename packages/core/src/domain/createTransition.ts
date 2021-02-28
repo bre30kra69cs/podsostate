@@ -6,7 +6,7 @@ import {
   FsmEvent,
   FsmContainer,
 } from './createFsmElements';
-import {createAsyncActionRunner, AsyncAction} from './effectRunners';
+import {AsyncAction} from './effectRunners';
 
 export interface Transition {
   startEvent: FsmEvent;
