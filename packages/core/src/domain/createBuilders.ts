@@ -1,39 +1,75 @@
-import {createFsmElement, SchemeBuilder} from './createMachine';
+import {FsmStateElement, isState} from './createMachine';
 import {FsmEvent} from './createEvent';
 import {FsmCoord} from './createAlias';
-import {mergeConfig} from '../utils/merge';
-
-type Gurard = () => boolean;
-
-type Action = () => void;
-
-type HeartAction = (unlock: Action) => void;
+import {createLocker} from '../common/createLocker';
+import {createMapper} from '../common/createMapper';
+import {SchemeBuilder} from './createMachine';
 
 interface StateConfig {
   coord: FsmCoord;
-  guard?: Gurard;
-  enter?: Action;
-  leave?: Action;
-  heart?: HeartAction;
+  guard?: () => boolean;
+  enter?: () => void;
+  leave?: () => void;
+  heart?: (unlock: () => void, send: (event: FsmEvent) => void) => void;
   transitions?: [FsmEvent, FsmCoord][];
 }
 
 export const createStateBuilder = (config: StateConfig): SchemeBuilder => {
   return (context, root) => {
-    const state = createFsmElement();
+    const locker = createLocker();
+    const transitionMapper = createMapper<FsmEvent, FsmCoord>();
+    const state = {} as FsmStateElement;
+
+    const income = () => {
+      if (locker.isUnlocked()) {
+        locker.lock();
+        config.enter?.();
+        if (config.heart) {
+          config.heart?.(locker.unlock, context.send);
+        } else {
+          locker.unlock();
+        }
+      }
+    };
+
+    const outcome = () => {
+      if (locker.isUnlocked()) {
+        locker.lock();
+        config.leave?.();
+        locker.unlock();
+      }
+    };
+
+    const send = (event: FsmEvent) => {
+      const coord = transitionMapper.get(event);
+      if (coord) {
+        const source = context.getPeer(state, coord);
+        if (source) {
+          outcome();
+          if (isState(source)) {
+            context.setCurrent(source);
+            source.income();
+          } else {
+            const sourceInit = source.getInit();
+            context.setCurrent(sourceInit);
+            sourceInit.income();
+          }
+        }
+      }
+    };
+
+    const init = () => {
+      config.transitions?.forEach(([event, coord]) => {
+        transitionMapper.set(event, coord);
+      });
+    };
+
+    init();
+
+    state.type = 'state';
+    state.coord = config.coord;
+    state.send = send;
+    state.income = income;
     context.registry(state, root);
-  };
-};
-
-interface SchemeConfig {
-  init: SchemeBuilder;
-  states?: SchemeBuilder[];
-}
-
-export const createSchemeBuilder = (config: SchemeConfig): SchemeBuilder => {
-  return (context, root) => {
-    const scheme = createFsmElement();
-    context.registry(scheme, root);
-    config.states?.forEach((builder) => builder(context, scheme));
   };
 };

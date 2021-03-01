@@ -1,50 +1,93 @@
-import {createMapper, createArrayMapper} from '../common/createMapper';
+import {createMapper} from '../common/createMapper';
 import {FsmEvent} from './createEvent';
+import {FsmCoord} from './createAlias';
 
-export type Send = (event: FsmEvent) => void;
+interface FsmElement {}
 
-export interface FsmElement {}
+interface FsmRootElement extends FsmElement {
+  type: 'root';
+}
 
-export const createFsmElement = (): FsmElement => {
-  return {};
+interface FsmCommonElement extends FsmElement {
+  coord: FsmCoord;
+  send: (event: FsmEvent) => void;
+  income: () => void;
+}
+
+export interface FsmStateElement extends FsmCommonElement {
+  type: 'state';
+}
+
+interface FsmSchemeElement extends FsmCommonElement {
+  type: 'scheme';
+  getInit: () => FsmStateElement;
+  getChildren: (coor: FsmCoord) => FsmUsedElement | undefined;
+}
+
+type FsmParentElement = FsmRootElement | FsmSchemeElement;
+
+type FsmUsedElement = FsmStateElement | FsmSchemeElement;
+
+type FsmTotalElement = FsmUsedElement | FsmRootElement;
+
+export const createFsmElement = (): FsmRootElement => {
+  return {
+    type: 'root',
+  };
 };
 
 export interface FsmContext {
-  registry: (children: FsmElement, parent: FsmElement) => void;
-  getParent: (children: FsmElement) => FsmElement;
-  getPeers: (children: FsmElement) => FsmElement[];
-  send: Send;
+  registry: (children: FsmUsedElement, parent: FsmTotalElement) => void;
+  getParent: (children: FsmUsedElement) => FsmParentElement | undefined;
+  getPeer: (children: FsmUsedElement, coord: FsmCoord) => FsmUsedElement | undefined;
+  send: (event: FsmEvent) => void;
+  setCurrent: (state: FsmStateElement) => void;
 }
 
-export type SchemeBuilder = (context: FsmContext, root: FsmElement) => void;
+export type SchemeBuilder = (context: FsmContext, root: FsmTotalElement) => void;
+
+export const isRoot = (element?: FsmTotalElement): element is FsmRootElement => {
+  return element?.type === 'root';
+};
+
+export const isScheme = (element?: FsmTotalElement): element is FsmSchemeElement => {
+  return element?.type === 'scheme';
+};
+
+export const isState = (element?: FsmTotalElement): element is FsmStateElement => {
+  return element?.type === 'state';
+};
 
 export const createMachine = (rootBuilder: SchemeBuilder) => {
-  const childrenMapper = createMapper<FsmElement, FsmElement>();
-  const parrentMapper = createArrayMapper<FsmElement, FsmElement>();
+  const mapper = createMapper<FsmUsedElement, FsmTotalElement>();
   const root = createFsmElement();
 
-  const registry = (children: FsmElement, parent: FsmElement) => {
-    childrenMapper.set(children, parent, 'unsave');
-    parrentMapper.set(parent, [children], 'save');
+  const registry = (children: FsmUsedElement, parent: FsmTotalElement) => {
+    mapper.set(children, parent, 'unsave');
   };
 
-  const getParent = (children: FsmElement) => {
-    return childrenMapper.get(children) as FsmElement;
+  const getParent = (children: FsmUsedElement) => {
+    return mapper.get(children) as FsmParentElement | undefined;
   };
 
-  const getPeers = (children: FsmElement) => {
+  const getPeer = (children: FsmUsedElement, coord: FsmCoord) => {
     const parent = getParent(children);
-    return parrentMapper.get(parent) as FsmElement[];
+    if (isScheme(parent)) {
+      return parent.getChildren(coord);
+    }
   };
 
   const send = (event: FsmEvent) => {};
+
+  const setCurrent = (state: FsmStateElement) => {};
 
   rootBuilder(
     {
       registry,
       getParent,
-      getPeers,
+      getPeer,
       send,
+      setCurrent,
     },
     root,
   );
