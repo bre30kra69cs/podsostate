@@ -1,8 +1,25 @@
 export interface FsmCoord {
-  x: number;
-  y: number;
+  getX: () => number;
+  getY: () => number;
+  serialize: () => string;
+  equal: (ccord: FsmCoord) => boolean;
 }
 
-export const createAlias = (x: number, y: number): FsmCoord => {
-  return {x, y};
+export const createCoord = (x: number, y: number): FsmCoord => {
+  const getX = () => x;
+
+  const getY = () => y;
+
+  const serialize = () => `${x}x${y}`;
+
+  const equal = (coord: FsmCoord) => {
+    return x === coord.getX() && y === coord.getY();
+  };
+
+  return {
+    getX,
+    getY,
+    serialize,
+    equal,
+  };
 };
