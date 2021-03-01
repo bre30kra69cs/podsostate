@@ -21,30 +21,26 @@ export const createStateBuilder = (config: StateConfig): SchemeBuilder => {
     const state = {} as FsmStateElement;
 
     const income = () => {
-      if (locker.isUnlocked()) {
-        locker.lock();
-        config.enter?.();
-        if (config.heart) {
-          config.heart?.(locker.unlock, context.send);
-        } else {
-          locker.unlock();
-        }
+      locker.lock();
+      config.enter?.();
+      if (config.heart) {
+        config.heart?.(locker.unlock, context.send);
+      } else {
+        locker.unlock();
       }
     };
 
     const outcome = () => {
-      if (locker.isUnlocked()) {
-        locker.lock();
-        config.leave?.();
-        locker.unlock();
-      }
+      locker.lock();
+      config.leave?.();
+      locker.unlock();
     };
 
     const send = (event: FsmEvent) => {
       const coord = transitionMapper.get(event);
       if (coord) {
         const source = context.getPeer(state, coord);
-        if (source) {
+        if (source && locker.isUnlocked()) {
           outcome();
           if (isState(source)) {
             context.setCurrent(source);
