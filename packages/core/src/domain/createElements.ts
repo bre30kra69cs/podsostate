@@ -14,7 +14,7 @@ import {createMapper} from '../common/createMapper';
 
 export interface StateConfig {
   coord: FsmCoord;
-  // guard?: () => boolean;
+  guard?: () => boolean;
   enter?: () => void;
   leave?: () => void;
   heart?: (unlock: () => void, send: (event: FsmEvent) => void) => void;
@@ -42,11 +42,15 @@ export const createStateElement = (context: FsmContext, config: StateConfig) => 
     locker.unlock();
   };
 
+  const isPassGuard = () => {
+    return config.guard ? config.guard() : true;
+  };
+
   const send = (event: FsmEvent) => {
     const coord = mapper.get(event);
     if (coord) {
       const source = context.getPeer(state, coord);
-      if (source && locker.isUnlocked()) {
+      if (source && locker.isUnlocked() && isPassGuard()) {
         outcome();
         if (isState(source)) {
           context.setCurrent(source);
