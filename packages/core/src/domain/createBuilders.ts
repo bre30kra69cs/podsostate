@@ -17,7 +17,7 @@ interface StateConfig {
 export const createStateBuilder = (config: StateConfig): SchemeBuilder => {
   return (context, root) => {
     const locker = createLocker();
-    const transitionMapper = createMapper<FsmEvent, FsmCoord>();
+    const mapper = createMapper<FsmEvent, FsmCoord>();
     const state = {} as FsmStateElement;
 
     const income = () => {
@@ -37,7 +37,7 @@ export const createStateBuilder = (config: StateConfig): SchemeBuilder => {
     };
 
     const send = (event: FsmEvent) => {
-      const coord = transitionMapper.get(event);
+      const coord = mapper.get(event);
       if (coord) {
         const source = context.getPeer(state, coord);
         if (source && locker.isUnlocked()) {
@@ -56,7 +56,7 @@ export const createStateBuilder = (config: StateConfig): SchemeBuilder => {
 
     const init = () => {
       config.transitions?.forEach(([event, coord]) => {
-        transitionMapper.set(event, coord);
+        mapper.set(event, coord);
       });
     };
 
