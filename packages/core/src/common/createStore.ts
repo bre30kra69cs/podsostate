@@ -1,4 +1,4 @@
-export const createStore = <T>(init: T) => {
+export const createStore = <T>(init?: T) => {
   let current = init;
 
   const set = (item: T) => {
@@ -12,13 +12,5 @@ export const createStore = <T>(init: T) => {
   return {
     set,
     get,
-  };
-};
-
-export const createSetStore = <T>(init: T) => {
-  const store = createStore(init);
-
-  return {
-    get: store.get,
   };
 };
