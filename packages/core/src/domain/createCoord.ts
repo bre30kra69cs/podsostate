@@ -6,11 +6,17 @@ export interface FsmCoord {
 }
 
 export const createCoord = (x: number, y: number): FsmCoord => {
-  const getX = () => x;
+  const getX = () => {
+    return x;
+  };
 
-  const getY = () => y;
+  const getY = () => {
+    return y;
+  };
 
-  const serialize = () => `${x}x${y}`;
+  const serialize = () => {
+    return `${x}x${y}`;
+  };
 
   const equal = (coord: FsmCoord) => {
     return x === coord.getX() && y === coord.getY();

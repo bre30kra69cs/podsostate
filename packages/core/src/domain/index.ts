@@ -1,4 +1,4 @@
-import {createSchemeBuilder, createStateBuilder} from './createBuilders';
+import {createSchemeBuilder as scheme, createStateBuilder as state} from './createBuilders';
 import {asyncActionRunner} from './actionRunners';
 import {createMachine} from './createMachine';
 import {createCoord} from './createCoord';
@@ -14,14 +14,14 @@ const ToLoading = createEvent();
 const ToDone = createEvent();
 const ToError = createEvent();
 
-const testScheme = createSchemeBuilder({
+const testScheme = scheme({
   init: INIT,
   states: [
-    createStateBuilder({
+    state({
       coord: INIT,
       transitions: [[ToLoading, LODAING]],
     }),
-    createStateBuilder({
+    state({
       coord: LODAING,
       enter: () => console.log('ENTER'),
       leave: () => console.log('LEAVE'),
@@ -38,7 +38,7 @@ const testScheme = createSchemeBuilder({
         [ToError, ERROR],
       ],
     }),
-    createStateBuilder({
+    state({
       coord: DONE,
       enter: () => console.log('DONE - ENTER'),
       leave: () => console.log('DONE - LEAVE'),
@@ -51,7 +51,7 @@ const testScheme = createSchemeBuilder({
         },
       }),
     }),
-    createStateBuilder({
+    state({
       coord: ERROR,
       enter: () => console.log('ERROR - ENTER'),
       leave: () => console.log('ERROR - LEAVE'),
