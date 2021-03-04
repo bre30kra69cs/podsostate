@@ -1,5 +1,13 @@
-export interface FsmEvent {}
+export interface FsmEvent {
+  serialize: () => string;
+}
 
 export const createEvent = (): FsmEvent => {
-  return {};
+  const serialize = () => {
+    return '';
+  };
+
+  return {
+    serialize,
+  };
 };

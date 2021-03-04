@@ -1,5 +1,13 @@
-export interface FsmId {}
+export interface FsmId {
+  serialize: () => string;
+}
 
 export const createId = (): FsmId => {
-  return {};
+  const serialize = () => {
+    return '';
+  };
+
+  return {
+    serialize,
+  };
 };
