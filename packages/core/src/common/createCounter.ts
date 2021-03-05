@@ -1,6 +1,7 @@
 interface Counter<T> {
   count: () => void;
   get: () => T;
+  fire: () => T;
 }
 
 type CounterParser<T = number> = (current: number) => T;
@@ -21,8 +22,14 @@ export const createCounter: CreateCounter = (parser?: CounterParser) => {
     return parser ? parser(current) : current;
   };
 
+  const fire = () => {
+    count();
+    return get();
+  };
+
   return {
     count,
     get,
+    fire,
   };
 };

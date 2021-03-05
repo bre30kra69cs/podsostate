@@ -8,7 +8,7 @@ interface FsmStateConfig {
 
 export interface FsmState {
   key: string;
-  to: Record<string, FsmState | string>;
+  to: Record<string, string>;
 }
 
 export const createState = (config: FsmStateConfig): FsmState => {
@@ -28,9 +28,11 @@ interface FsmSchemeConfig {
   states: (FsmScheme | FsmState)[];
 }
 
+export type FsmSchemeOrState = FsmScheme | FsmState;
+
 export interface FsmScheme {
-  key: string;
-  states: (FsmScheme | FsmState)[];
+  init: string;
+  states: FsmSchemeOrState[];
 }
 
 export const isState = (value: any): value is FsmState => {
@@ -38,12 +40,12 @@ export const isState = (value: any): value is FsmState => {
 };
 
 export const isScheme = (value: any): value is FsmScheme => {
-  return !!value?.key && !!value?.states;
+  return !!value?.init && !!value?.states;
 };
 
 export const createScheme = (config: FsmSchemeConfig): FsmScheme => {
   return {
-    key: config.init.serialize(),
+    init: config.init.serialize(),
     states: config.states,
   };
 };

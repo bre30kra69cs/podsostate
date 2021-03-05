@@ -1,19 +1,33 @@
-import {createMapper} from '../common/createMapper';
+import {createMapper, Mapper} from '../common/createMapper';
 import {createCounter} from '../common/createCounter';
-import {FsmScheme} from './scheme';
-
-type ContainerId = number;
+import {isScheme, isState, FsmScheme, FsmState, FsmSchemeOrState} from './scheme';
 
 interface Item {
-  id: ContainerId;
-  sync: Record<ContainerId, Item>;
-  to: Record<ContainerId, Item>;
+  key: string;
+  source: any;
+  to: Record<string, Item>;
 }
 
-const namespaceCounter = createCounter((current) => `ns${current}`);
+const keyCounter = createCounter((current) => `${current}`);
 
 export const createContainer = () => {
-  const mapper = createMapper<ContainerId, Item>();
+  const setIter = (
+    scheme: FsmScheme,
+    keyMapper: Mapper<string, Item>,
+    reverseKeyMapper: Mapper<string, string>,
+  ) => {
+    scheme.states.forEach((elem) => {
+      if (isState(elem)) {
+        const key = keyCounter.fire();
+        reverseKeyMapper.set(elem.key, key);
+        keyMapper.set(key, {
+          key,
+          source: elem,
+          to: {},
+        });
+      }
+    });
+  };
 
   const set = (scheme: FsmScheme) => {};
 };

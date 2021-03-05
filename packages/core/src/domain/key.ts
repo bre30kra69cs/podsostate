@@ -8,8 +8,7 @@ export interface FsmKey {
 
 export const createKey = (): FsmKey => {
   const serialize = () => {
-    counter.count();
-    return counter.get();
+    return counter.fire();
   };
 
   return {

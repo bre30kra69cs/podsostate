@@ -8,8 +8,7 @@ export interface FsmEvent {
 
 export const createEvent = (): FsmEvent => {
   const serialize = () => {
-    counter.count();
-    return counter.get();
+    return counter.fire();
   };
 
   return {

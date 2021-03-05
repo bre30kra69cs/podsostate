@@ -1,6 +1,6 @@
 import {uniqArray} from '../utils/uniq';
 
-interface Mapper<K, V> {
+export interface Mapper<K, V> {
   get: (key: K) => V | undefined;
   set: (key: K, value: V, strategy?: 'unsave' | 'save') => V;
   del: (key: K) => void;
