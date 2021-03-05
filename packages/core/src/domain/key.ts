@@ -2,11 +2,11 @@ import {createCounter} from '../common/createCounter';
 
 const counter = createCounter((current) => `${current}`);
 
-export interface FsmEvent {
+export interface FsmKey {
   serialize: () => string;
 }
 
-export const createEvent = (): FsmEvent => {
+export const createKey = (): FsmKey => {
   const serialize = () => {
     counter.count();
     return counter.get();

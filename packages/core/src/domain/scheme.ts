@@ -1,9 +1,9 @@
-import {FsmId} from './id';
+import {FsmKey} from './key';
 import {FsmEvent} from './event';
 
 interface FsmStateConfig {
-  key: FsmId;
-  transitions: [FsmEvent, FsmId][];
+  key: FsmKey;
+  transitions: [FsmEvent, FsmKey][];
 }
 
 export interface FsmState {
@@ -24,12 +24,12 @@ export const createState = (config: FsmStateConfig): FsmState => {
 };
 
 interface FsmSchemeConfig {
-  init: FsmId;
+  init: FsmKey;
   states: (FsmScheme | FsmState)[];
 }
 
 export interface FsmScheme {
-  init: string;
+  key: string;
   states: (FsmScheme | FsmState)[];
 }
 
@@ -38,12 +38,12 @@ export const isState = (value: any): value is FsmState => {
 };
 
 export const isScheme = (value: any): value is FsmScheme => {
-  return !!value?.init && !!value?.states;
+  return !!value?.key && !!value?.states;
 };
 
 export const createScheme = (config: FsmSchemeConfig): FsmScheme => {
   return {
-    init: config.init.serialize(),
+    key: config.init.serialize(),
     states: config.states,
   };
 };
