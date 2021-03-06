@@ -27,11 +27,13 @@ export type FsmSchemeOrState = FsmScheme | FsmState;
 
 interface FsmSchemeConfig {
   init: FsmKey;
+  out?: FsmEvent[];
   states: FsmSchemeOrState[];
 }
 
 export interface FsmScheme {
   init: string;
+  out: string[];
   states: FsmSchemeOrState[];
 }
 
@@ -46,6 +48,7 @@ export const isScheme = (value: any): value is FsmScheme => {
 export const createScheme = (config: FsmSchemeConfig): FsmScheme => {
   return {
     init: config.init.serialize(),
+    out: config?.out ? config.out.map((item) => item.serialize()) : [],
     states: config.states,
   };
 };

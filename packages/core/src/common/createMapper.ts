@@ -102,3 +102,47 @@ export const createArrayMapper = <K, V>(): Mapper<K, V[]> => {
     clear,
   };
 };
+
+interface ReveerseMapper<K, V> extends Mapper<K, V> {
+  getKey: (value: V) => K | undefined;
+}
+
+export const createReverseMapper = <K, V>(): ReveerseMapper<K, V> => {
+  const keyMapper = createMapper<K, V>();
+  const valueMapper = createMapper<V, K>();
+
+  const getKey = (value: V) => {
+    return valueMapper.get(value);
+  };
+
+  const get = (key: K) => {
+    return keyMapper.get(key);
+  };
+
+  const set = (key: K, value: V, strategy: 'unsave' | 'save' = 'unsave') => {
+    keyMapper.set(key, value, strategy);
+    valueMapper.set(value, key, strategy);
+    return get(key) as V;
+  };
+
+  const del = (key: K) => {
+    const value = get(key);
+    keyMapper.del(key);
+    if (value) {
+      valueMapper.del(value);
+    }
+  };
+
+  const clear = () => {
+    keyMapper.clear();
+    valueMapper.clear();
+  };
+
+  return {
+    getKey,
+    get,
+    set,
+    del,
+    clear,
+  };
+};

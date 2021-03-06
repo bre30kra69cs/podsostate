@@ -16,7 +16,7 @@ interface RichTreeNode {
 
 const counter = createCounter((current) => `id${current}`);
 
-const schemeToRichTree = (scheme: FsmScheme) => {
+export const schemeToRichTree = (scheme: FsmScheme) => {
   const store = createStore<RichTreeNode>();
 
   const iter = (source: FsmScheme, parent?: RichTreeNode) => {
@@ -25,7 +25,21 @@ const schemeToRichTree = (scheme: FsmScheme) => {
       if (isState(next)) {
         return {
           ...acc,
-          [next.key]: next,
+          [next.key]: {
+            ...next,
+            to: {
+              ...next.to,
+              ...source.out.reduce((acc, next) => {
+                if (parent) {
+                  return {
+                    ...acc,
+                    [next]: parent.id,
+                  };
+                }
+                return acc;
+              }, {}),
+            },
+          },
         };
       }
       return acc;
@@ -33,7 +47,11 @@ const schemeToRichTree = (scheme: FsmScheme) => {
     const current = {
       id,
       states,
-      childrens: {},
+      childrens: parent
+        ? {
+            [parent.id]: parent,
+          }
+        : {},
       parent,
       init: source.init,
     };
@@ -59,9 +77,10 @@ const schemeToRichTree = (scheme: FsmScheme) => {
   return store.get() as RichTreeNode;
 };
 
-interface StatfullTreeNode {
+export interface StatfullTreeNode {
   getCurrent: () => FsmState | undefined;
   getNextNode: (event: FsmEvent) => StatfullTreeNode;
+  getNextStop: (event: FsmEvent) => StatfullTreeNode | undefined;
   setChildren: (key: string, children: StatfullTreeNode) => void;
 }
 
@@ -101,6 +120,18 @@ const createStatfullTreeNode = (source: RichTreeNode): StatfullTreeNode => {
     return self();
   };
 
+  const getNextStop = (event: FsmEvent): StatfullTreeNode | undefined => {
+    const next = getNextNode(event);
+    if (next) {
+      const current = next.getCurrent();
+      if (!current) {
+        return next.getNextStop(event);
+      }
+
+      return next;
+    }
+  };
+
   const setChildren = (key: string, children: StatfullTreeNode) => {
     childrens.set(key, children);
   };
@@ -110,13 +141,14 @@ const createStatfullTreeNode = (source: RichTreeNode): StatfullTreeNode => {
       getCurrent,
       getNextNode,
       setChildren,
+      getNextStop,
     };
   };
 
   return self();
 };
 
-const richTreeToStatfullTree = (root: RichTreeNode) => {
+export const richTreeToStatfullTree = (root: RichTreeNode) => {
   const store = createStore<StatfullTreeNode>();
 
   const iter = (treeNode: RichTreeNode, parent?: StatfullTreeNode) => {
@@ -135,4 +167,9 @@ const richTreeToStatfullTree = (root: RichTreeNode) => {
   iter(root);
 
   return store.get() as StatfullTreeNode;
+};
+
+export const parse = (scheme: FsmScheme) => {
+  const richTree = schemeToRichTree(scheme);
+  return richTreeToStatfullTree(richTree);
 };

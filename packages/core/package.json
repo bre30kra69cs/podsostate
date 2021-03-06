@@ -10,10 +10,11 @@
     "build": "npx tsc",
     "clean": "rm -rf build typings",
     "test": "node ./build/domain",
-    "start": "npm run clean && npm run build && npm run test"
+    "start": "npx ts-node"
   },
   "devDependencies": {
-    "typescript": "^4.1.5"
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.3"
   },
   "dependencies": {
     "xstate": "^4.16.2"
