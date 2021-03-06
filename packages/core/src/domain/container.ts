@@ -8,25 +8,20 @@ interface Item {
   to: Record<string, Item>;
 }
 
-const keyCounter = createCounter((current) => `${current}`);
+const idCounter = createCounter((current) => `${current}`);
 
 export const createContainer = () => {
-  const setIter = (
-    scheme: FsmScheme,
-    keyMapper: Mapper<string, Item>,
-    reverseKeyMapper: Mapper<string, string>,
-  ) => {
-    scheme.states.forEach((elem) => {
-      if (isState(elem)) {
-        const key = keyCounter.fire();
-        reverseKeyMapper.set(elem.key, key);
-        keyMapper.set(key, {
-          key,
-          source: elem,
-          to: {},
-        });
+  const setIter = (scheme: FsmScheme) => {
+    const id2key = createMapper<string, string>();
+    const key2id = createMapper<string, string>();
+    scheme.states.forEach((item) => {
+      if (isState(item)) {
+        const id = idCounter.fire();
+        key2id.set(item.key, id);
+        id2key.set(id, item.key);
       }
     });
+    scheme.states.forEach((item) => {});
   };
 
   const set = (scheme: FsmScheme) => {};

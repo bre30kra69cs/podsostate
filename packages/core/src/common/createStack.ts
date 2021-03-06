@@ -7,7 +7,7 @@ interface StackConfig {
 
 export const createStack = <T>(sourceConfig?: StackConfig) => {
   const config = mergeConfig(sourceConfig, {});
-  const stack: T[] = [];
+  let stack: T[] = [];
 
   const isLimitOver = () => {
     return isNumber(config?.limit) && stack.length > config.limit;
@@ -32,10 +32,15 @@ export const createStack = <T>(sourceConfig?: StackConfig) => {
     return stack[stack.length - 1];
   };
 
+  const reset = () => {
+    stack = [];
+  };
+
   return {
     push,
     pop,
     head,
+    reset,
   };
 };
 

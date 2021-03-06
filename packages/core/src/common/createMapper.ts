@@ -4,6 +4,7 @@ export interface Mapper<K, V> {
   get: (key: K) => V | undefined;
   set: (key: K, value: V, strategy?: 'unsave' | 'save') => V;
   del: (key: K) => void;
+  clear: () => void;
 }
 
 export const createMapper = <K, V>(): Mapper<K, V> => {
@@ -37,10 +38,15 @@ export const createMapper = <K, V>(): Mapper<K, V> => {
     map.delete(key);
   };
 
+  const clear = () => {
+    map.clear();
+  };
+
   return {
     get,
     set,
     del,
+    clear,
   };
 };
 
@@ -85,9 +91,14 @@ export const createArrayMapper = <K, V>(): Mapper<K, V[]> => {
     mapper.del(key);
   };
 
+  const clear = () => {
+    mapper.clear();
+  };
+
   return {
     get,
     set,
     del,
+    clear,
   };
 };

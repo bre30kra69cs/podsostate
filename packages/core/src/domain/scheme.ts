@@ -23,12 +23,12 @@ export const createState = (config: FsmStateConfig): FsmState => {
   };
 };
 
+export type FsmSchemeOrState = FsmScheme | FsmState;
+
 interface FsmSchemeConfig {
   init: FsmKey;
-  states: (FsmScheme | FsmState)[];
+  states: FsmSchemeOrState[];
 }
-
-export type FsmSchemeOrState = FsmScheme | FsmState;
 
 export interface FsmScheme {
   init: string;
