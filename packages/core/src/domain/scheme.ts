@@ -1,11 +1,11 @@
-import {noop} from '../utils/noop';
+import {Locker} from '../common/createLocker';
 import {uniqArray} from '../utils/uniq';
 
 export interface FsmEvent {}
 
 export interface FsmState {
   leave?: () => void;
-  enter?: (unlock: () => void, send: (event: FsmEvent) => void) => void;
+  enter?: (locker: Locker, send: (event: FsmEvent) => void) => void;
 }
 
 export type FsmSchemeOrState = FsmScheme | FsmState;
@@ -25,7 +25,7 @@ export const createEvent = (): FsmEvent => {
 
 interface FsmStateConfig {
   leave?: () => void;
-  enter?: (unlock: () => void, send: (event: FsmEvent) => void) => void;
+  enter?: (locker: Locker, send: (event: FsmEvent) => void) => void;
 }
 
 export const createState = (config?: FsmStateConfig): FsmState => {

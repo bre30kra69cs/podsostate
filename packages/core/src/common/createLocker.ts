@@ -1,4 +1,11 @@
-export const createLocker = (init: boolean = true) => {
+export interface Locker {
+  lock: () => boolean;
+  unlock: () => boolean;
+  reverse: () => boolean;
+  isUnlocked: () => boolean;
+}
+
+export const createLocker = (init: boolean = true): Locker => {
   let unlocked = init;
 
   const lock = () => {

@@ -1,4 +1,18 @@
+import {createLocker, Locker} from '../common/createLocker';
 import {FsmEvent} from './scheme';
+
+const sendOnceWrapper = (locker: Locker, send: (event: FsmEvent) => void) => {
+  const onceLocker = createLocker();
+  onceLocker.unlock();
+
+  return (event: FsmEvent) => {
+    if (onceLocker.isUnlocked()) {
+      locker.unlock();
+      send(event);
+    }
+    onceLocker.lock();
+  };
+};
 
 interface ActionTapConfig {
   start?: () => void;
@@ -8,17 +22,18 @@ interface ActionTapConfig {
 }
 
 export const actionTap = (config: ActionTapConfig) => (
-  unlock: () => void,
+  locker: Locker,
   send: (event: FsmEvent) => void,
 ) => {
+  const sendOnce = sendOnceWrapper(locker, send);
   config.start?.();
   try {
     config.action();
-    unlock();
-    config.resolve?.(send);
+    locker.unlock();
+    config.resolve?.(sendOnce);
   } catch {
-    unlock();
-    config.reject?.(send);
+    locker.unlock();
+    config.reject?.(sendOnce);
   }
 };
 
@@ -30,18 +45,19 @@ interface AsyncActionTapConfig {
 }
 
 export const asyncActionTap = (config: AsyncActionTapConfig) => (
-  unlock: () => void,
+  locker: Locker,
   send: (event: FsmEvent) => void,
 ) => {
+  const sendOnce = sendOnceWrapper(locker, send);
   config.start?.();
   const target = async () => {
     try {
       await config.action();
-      unlock();
-      config.resolve?.(send);
+      locker.unlock();
+      config.resolve?.(sendOnce);
     } catch {
-      unlock();
-      config.reject?.(send);
+      locker.unlock();
+      config.reject?.(sendOnce);
     }
   };
   target();

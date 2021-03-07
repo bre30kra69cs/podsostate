@@ -8,33 +8,56 @@ import {actionTap, asyncActionTap} from './taps';
 const ToLoading = createEvent();
 const ToDone = createEvent();
 const ToError = createEvent();
+const ToExtra = createEvent();
 
 const INIT = createState();
 const LOADING = createState({
-  enter: asyncActionTap({
-    action: async () => {
-      await wait(4000);
-      console.log(1);
-      throw new Error('1 - error');
+  enter: actionTap({
+    action: () => {
+      console.log('WAIT LOADING');
+      // await wait(2000);
+      console.log('ENTER LOADING');
     },
     resolve: (send) => {
-      // send(ToDone);
+      send(ToDone);
+      send(ToExtra);
     },
     reject: (send) => {
       send(ToError);
     },
   }),
-  leave: () => console.log(2),
+  leave: () => {
+    console.log('LEAVE LOADING');
+  },
 });
 const DONE = createState({
-  enter: (unlock) => {
-    unlock();
-    console.log(3);
+  enter: actionTap({
+    action: () => {
+      console.log('WAIT DONE');
+      // await wait(2000);
+      console.log('ENTER DONE');
+    },
+    resolve: (send) => {
+      send(ToExtra);
+    },
+  }),
+  leave: () => {
+    console.log('LEAVE DONE');
   },
 });
 const ERROR = createState({
   enter: () => {
     console.log(123);
+  },
+});
+const EXTRA = createState({
+  enter: actionTap({
+    action: () => {
+      console.log('ENTER EXTRA');
+    },
+  }),
+  leave: () => {
+    console.log('LEAVE EXTRA');
   },
 });
 
@@ -44,6 +67,8 @@ const testScheme = createScheme({
     [INIT, ToLoading, LOADING],
     [LOADING, ToDone, DONE],
     [LOADING, ToError, ERROR],
+    [DONE, ToExtra, EXTRA],
+    [ERROR, ToExtra, EXTRA],
   ],
 });
 

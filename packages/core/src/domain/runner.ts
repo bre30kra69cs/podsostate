@@ -17,7 +17,7 @@ export const createRunner = (node: FsmNode<FsmState>): Runner => {
     }
     if (locker.isUnlocked()) {
       locker.lock();
-      node.source.enter(locker.unlock, send);
+      node.source.enter(locker, send);
     }
   };
 
