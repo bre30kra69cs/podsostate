@@ -1,10 +1,9 @@
 import {createSilenceEmitter} from '../common/createEmitter';
-import {isScheme as isSchemeGuard, RouteTable, FsmNode, FsmNodeTable, ToInit} from './parser';
+import {FsmNode, ToInit} from './parser';
 import {FsmEvent} from './scheme';
-import {createContainer} from './container';
+import {FsmContariner} from './container';
 
-const createProcessor = (routeTable: RouteTable) => {
-  const container = createContainer(routeTable);
+export const createProcessor = (container: FsmContariner) => {
   const emitter = createSilenceEmitter<FsmNode>();
 
   const next = (event: FsmEvent) => {

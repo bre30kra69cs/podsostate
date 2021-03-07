@@ -60,10 +60,13 @@ export const parseRouteTable = (root: FsmScheme): RouteTable => {
         nodeMapper.set(event, toNode);
       });
     });
+    const outEvents = isScheme(parentNode.source)
+      ? getTransitions(current, parentNode.source.transitions).map(([, event]) => event)
+      : [];
     current.states.forEach((state) => {
       const stateNode = stateMapper.get(state) as FsmNode;
       const nodeMapper = mapper.get(stateNode) as FsmNodeTable;
-      current.outEvents.forEach((event) => {
+      outEvents.forEach((event) => {
         nodeMapper.set(event, currentNode);
       });
     });

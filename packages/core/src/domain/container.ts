@@ -1,9 +1,8 @@
-import {createStore} from '../common/createStore';
 import {createPushStack} from '../common/createStack';
 import {isScheme as isSchemeGuard, RouteTable, FsmNode, FsmNodeTable} from './parser';
 import {FsmEvent} from './scheme';
 
-interface FsmContariner {
+export interface FsmContariner {
   current: () => FsmNode;
   next: (event: FsmEvent) => FsmNode;
   set: (key: FsmNode, event: FsmEvent, value: FsmNode) => void;
@@ -32,9 +31,8 @@ export const createContainer = (routeTable: RouteTable): FsmContariner => {
   const next = (event: FsmEvent) => {
     const map = getCurrentMap();
     const next = map.get(event);
-    if (next) {
-      stack.push(next);
-    }
+    const current = getCurrnet();
+    stack.push(next ?? current);
     return getCurrnet();
   };
 

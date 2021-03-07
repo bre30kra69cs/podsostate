@@ -14,7 +14,6 @@ export type FsmTransition = [FsmSchemeOrState, FsmEvent, FsmSchemeOrState];
 
 export interface FsmScheme {
   init: FsmSchemeOrState;
-  outEvents: FsmEvent[];
   events: FsmEvent[];
   states: FsmSchemeOrState[];
   transitions: FsmTransition[];
@@ -38,7 +37,6 @@ export const createState = (config?: FsmStateConfig): FsmState => {
 
 interface FsmSchemeConfig {
   init: FsmSchemeOrState;
-  outEvents?: FsmEvent[];
   transitions?: FsmTransition[];
 }
 
@@ -54,7 +52,6 @@ export const createScheme = (config: FsmSchemeConfig): FsmScheme => {
     }, [] as FsmEvent[]) ?? [];
   return {
     init: config.init,
-    outEvents: config.outEvents ?? [],
     events,
     states,
     transitions: config.transitions ?? [],
