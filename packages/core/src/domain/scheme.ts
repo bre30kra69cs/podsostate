@@ -43,11 +43,11 @@ interface FsmSchemeConfig {
 }
 
 export const createScheme = (config: FsmSchemeConfig): FsmScheme => {
+  const acc = [config.init];
   const states =
-    config.transitions?.reduce(
-      (acc, [from, , to]) => uniqArray(acc, [from, to]),
-      [] as FsmSchemeOrState[],
-    ) ?? [];
+    config.transitions?.reduce((acc, [from, , to]) => {
+      return uniqArray(acc, [from, to]);
+    }, acc) ?? acc;
   const events =
     config.transitions?.reduce((acc, [, event]) => {
       return uniqArray(acc, [event]);
