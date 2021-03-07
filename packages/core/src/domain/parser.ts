@@ -9,9 +9,9 @@ import {
   FsmSchemeOrState,
 } from './scheme';
 
-export interface FsmNode {
+export interface FsmNode<T = FsmSchemeOrState> {
   id: string;
-  source: FsmSchemeOrState;
+  source: T;
   parent?: FsmNode;
 }
 
@@ -45,12 +45,14 @@ export const parseRouteTable = (root: FsmScheme): RouteTable => {
   const iter = (current: FsmScheme, currentNode: FsmNode, parentNode: FsmNode) => {
     const currentMapper = mapper.get(currentNode) as FsmNodeTable;
     const stateMapper = createMapper<FsmSchemeOrState, FsmNode>();
+
     current.states.forEach((state) => {
       const stateNode = createNode(state, currentNode);
       const nodeMapper = createMapper<FsmEvent, FsmNode>();
       mapper.set(stateNode, nodeMapper);
       stateMapper.set(state, stateNode);
     });
+
     current.states.forEach((state) => {
       const stateNode = stateMapper.get(state) as FsmNode;
       const transitions = getTransitions(state, current.transitions);
@@ -60,9 +62,11 @@ export const parseRouteTable = (root: FsmScheme): RouteTable => {
         nodeMapper.set(event, toNode);
       });
     });
+
     const outEvents = isScheme(parentNode.source)
       ? getTransitions(current, parentNode.source.transitions).map(([, event]) => event)
       : [];
+
     current.states.forEach((state) => {
       const stateNode = stateMapper.get(state) as FsmNode;
       const nodeMapper = mapper.get(stateNode) as FsmNodeTable;
@@ -70,6 +74,7 @@ export const parseRouteTable = (root: FsmScheme): RouteTable => {
         nodeMapper.set(event, currentNode);
       });
     });
+
     const initNode = stateMapper.get(current.init) as FsmNode;
     currentMapper.set(ToInit, initNode);
     current.states.forEach((state) => {

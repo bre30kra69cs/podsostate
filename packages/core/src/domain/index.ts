@@ -36,4 +36,3 @@ machine.subscribe(console.log);
 machine.send(ToLoading);
 machine.send(ToLoading);
 machine.send(ToLoading);
-machine.send(ToDone);
