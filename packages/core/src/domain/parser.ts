@@ -33,11 +33,7 @@ export const isScheme = (value?: any): value is FsmScheme => {
   return !!value.init;
 };
 
-const ToInit = createEvent();
-
-const PARSE = createState();
-
-const parseNode = createNode(PARSE);
+export const ToInit = createEvent();
 
 export type FsmNodeTable = Mapper<FsmEvent, FsmNode>;
 
@@ -64,8 +60,12 @@ export const parseRouteTable = (root: FsmScheme): RouteTable => {
         nodeMapper.set(event, toNode);
       });
     });
-    current.outEvents.forEach((event) => {
-      currentMapper.set(event, parentNode);
+    current.states.forEach((state) => {
+      const stateNode = stateMapper.get(state) as FsmNode;
+      const nodeMapper = mapper.get(stateNode) as FsmNodeTable;
+      current.outEvents.forEach((event) => {
+        nodeMapper.set(event, currentNode);
+      });
     });
     const initNode = stateMapper.get(current.init) as FsmNode;
     currentMapper.set(ToInit, initNode);
@@ -77,6 +77,8 @@ export const parseRouteTable = (root: FsmScheme): RouteTable => {
     });
   };
 
+  const PARSE = createState();
+  const parseNode = createNode(PARSE);
   const rootNode = createNode(root, parseNode);
   const nodeMapper = createMapper<FsmEvent, FsmNode>();
   mapper.set(rootNode, nodeMapper);

@@ -36,11 +36,19 @@ export const createStack = <T>(sourceConfig?: StackConfig) => {
     stack = [];
   };
 
+  const get = (deep: number): T | undefined => {
+    const index = stack.length - 1 - deep;
+    if (index >= 0) {
+      return stack[index];
+    }
+  };
+
   return {
     push,
     pop,
     head,
     reset,
+    get,
   };
 };
 
@@ -50,5 +58,6 @@ export const createPushStack = <T>(sourceConfig?: StackConfig) => {
   return {
     push: stack.push,
     head: stack.head,
+    get: stack.get,
   };
 };
