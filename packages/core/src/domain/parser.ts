@@ -1,4 +1,5 @@
 import {createMapper, Mapper} from '../common/createMapper';
+import {createCounter} from '../common/createCounter';
 import {
   createEvent,
   createState,
@@ -9,18 +10,18 @@ import {
 } from './scheme';
 
 export interface FsmNode {
+  id: string;
   source: FsmSchemeOrState;
-  compare: (target: FsmSchemeOrState) => boolean;
+  parent?: FsmNode;
 }
 
-const createNode = (source: FsmSchemeOrState): FsmNode => {
-  const compare = (target: FsmSchemeOrState) => {
-    return source === target;
-  };
+const counter = createCounter((current) => `node${current}`);
 
+const createNode = (source: FsmSchemeOrState, parent?: FsmNode): FsmNode => {
   return {
+    id: counter.fire(),
     source,
-    compare,
+    parent,
   };
 };
 
@@ -32,7 +33,7 @@ export const isScheme = (value?: any): value is FsmScheme => {
   return !!value.init;
 };
 
-export const ToInit = createEvent();
+const ToInit = createEvent();
 
 const PARSE = createState();
 
@@ -40,14 +41,16 @@ const parseNode = createNode(PARSE);
 
 export type FsmNodeTable = Mapper<FsmEvent, FsmNode>;
 
-export const parse = (root: FsmScheme): [FsmNode, Mapper<FsmNode, FsmNodeTable>] => {
+export type RouteTable = [FsmNode, Mapper<FsmNode, FsmNodeTable>];
+
+export const parseRouteTable = (root: FsmScheme): RouteTable => {
   const mapper = createMapper<FsmNode, FsmNodeTable>();
 
   const iter = (current: FsmScheme, currentNode: FsmNode, parentNode: FsmNode) => {
     const currentMapper = mapper.get(currentNode) as FsmNodeTable;
     const stateMapper = createMapper<FsmSchemeOrState, FsmNode>();
     current.states.forEach((state) => {
-      const stateNode = createNode(state);
+      const stateNode = createNode(state, currentNode);
       const nodeMapper = createMapper<FsmEvent, FsmNode>();
       mapper.set(stateNode, nodeMapper);
       stateMapper.set(state, stateNode);
@@ -74,7 +77,9 @@ export const parse = (root: FsmScheme): [FsmNode, Mapper<FsmNode, FsmNodeTable>]
     });
   };
 
-  const rootNode = createNode(root);
+  const rootNode = createNode(root, parseNode);
+  const nodeMapper = createMapper<FsmEvent, FsmNode>();
+  mapper.set(rootNode, nodeMapper);
   iter(root, rootNode, parseNode);
   return [rootNode, mapper];
 };

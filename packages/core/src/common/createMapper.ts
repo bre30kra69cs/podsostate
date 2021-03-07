@@ -5,6 +5,7 @@ export interface Mapper<K, V> {
   set: (key: K, value: V, strategy?: 'unsave' | 'save') => V;
   del: (key: K) => void;
   clear: () => void;
+  entries: () => IterableIterator<[K, V]>;
 }
 
 export const createMapper = <K, V>(): Mapper<K, V> => {
@@ -42,11 +43,16 @@ export const createMapper = <K, V>(): Mapper<K, V> => {
     map.clear();
   };
 
+  const entries = () => {
+    return map.entries();
+  };
+
   return {
     get,
     set,
     del,
     clear,
+    entries,
   };
 };
 
@@ -95,11 +101,16 @@ export const createArrayMapper = <K, V>(): Mapper<K, V[]> => {
     mapper.clear();
   };
 
+  const entries = () => {
+    return mapper.entries();
+  };
+
   return {
     get,
     set,
     del,
     clear,
+    entries,
   };
 };
 
@@ -138,11 +149,16 @@ export const createReverseMapper = <K, V>(): ReveerseMapper<K, V> => {
     valueMapper.clear();
   };
 
+  const entries = () => {
+    return keyMapper.entries();
+  };
+
   return {
     getKey,
     get,
     set,
     del,
     clear,
+    entries,
   };
 };
