@@ -12,6 +12,9 @@ export const createRunner = (node: FsmNode<FsmState>): Runner => {
   const locker = createLocker();
 
   const income = (send: (event: FsmEvent) => void) => {
+    if (!node.source.enter) {
+      return;
+    }
     if (locker.isUnlocked()) {
       locker.lock();
       node.source.enter(locker.unlock, send);
@@ -21,7 +24,7 @@ export const createRunner = (node: FsmNode<FsmState>): Runner => {
   const outcome = () => {
     if (locker.isUnlocked()) {
       locker.lock();
-      node.source.leave();
+      node.source.leave?.();
       locker.unlock();
     }
   };

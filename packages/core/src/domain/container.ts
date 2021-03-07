@@ -9,6 +9,7 @@ export interface FsmContariner {
   isChanged: () => boolean;
   isScheme: () => boolean;
   isLifted: () => boolean;
+  isExist: (event: FsmEvent) => boolean;
 }
 
 export const createContainer = (routeTable: RouteTable): FsmContariner => {
@@ -63,6 +64,11 @@ export const createContainer = (routeTable: RouteTable): FsmContariner => {
     return prev?.parent === current;
   };
 
+  const isExist = (event: FsmEvent) => {
+    const map = getCurrentMap();
+    return !!map.get(event);
+  };
+
   const init = () => {
     stack.push(root);
   };
@@ -76,5 +82,6 @@ export const createContainer = (routeTable: RouteTable): FsmContariner => {
     isChanged,
     isScheme,
     isLifted,
+    isExist,
   };
 };

@@ -29,10 +29,12 @@ export const createProcessor = (container: FsmContariner) => {
     }
   };
 
-  const sendGuard = (payload: () => void) => {
-    const runner = stack.head() as Runner;
-    if (runner.isRunable()) {
-      payload();
+  const sendGuard = (event: FsmEvent, payload: () => void) => {
+    if (container.isExist(event)) {
+      const runner = stack.head() as Runner;
+      if (runner.isRunable()) {
+        payload();
+      }
     }
   };
 
@@ -45,7 +47,7 @@ export const createProcessor = (container: FsmContariner) => {
   };
 
   const send = (event: FsmEvent) => {
-    sendGuard(() => {
+    sendGuard(event, () => {
       const runner = stack.head() as Runner;
       runner.outcome();
       toState(event);

@@ -4,8 +4,8 @@ import {uniqArray} from '../utils/uniq';
 export interface FsmEvent {}
 
 export interface FsmState {
-  leave: () => void;
-  enter: (unlock: () => void, send: (event: FsmEvent) => void) => void;
+  leave?: () => void;
+  enter?: (unlock: () => void, send: (event: FsmEvent) => void) => void;
 }
 
 export type FsmSchemeOrState = FsmScheme | FsmState;
@@ -30,8 +30,8 @@ interface FsmStateConfig {
 
 export const createState = (config?: FsmStateConfig): FsmState => {
   return {
-    leave: config?.leave ?? noop,
-    enter: config?.enter ?? noop,
+    leave: config?.leave,
+    enter: config?.enter,
   };
 };
 
