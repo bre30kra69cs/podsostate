@@ -37,7 +37,10 @@ export const ToInit = createEvent();
 
 export type FsmNodeTable = Mapper<FsmEvent, FsmNode>;
 
-export type RouteTable = [FsmNode, Mapper<FsmNode, FsmNodeTable>];
+export interface RouteTable {
+  root: FsmNode;
+  table: Mapper<FsmNode, FsmNodeTable>;
+}
 
 export const parseRouteTable = (root: FsmScheme): RouteTable => {
   const mapper = createMapper<FsmNode, FsmNodeTable>();
@@ -91,5 +94,8 @@ export const parseRouteTable = (root: FsmScheme): RouteTable => {
   const nodeMapper = createMapper<FsmEvent, FsmNode>();
   mapper.set(rootNode, nodeMapper);
   iter(root, rootNode, parseNode);
-  return [rootNode, mapper];
+  return {
+    root: rootNode,
+    table: mapper,
+  };
 };

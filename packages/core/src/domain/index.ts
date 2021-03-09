@@ -74,7 +74,7 @@ const testScheme = createScheme({
 
 // log(testScheme);
 
-const [rootNode, mapper] = parseRouteTable(testScheme);
+const {root, table} = parseRouteTable(testScheme);
 
 // for (const i of mapper.entries()) {
 //   console.log(i);

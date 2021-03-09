@@ -13,7 +13,7 @@ export interface FsmContariner {
 }
 
 export const createContainer = (routeTable: RouteTable): FsmContariner => {
-  const [root, table] = routeTable;
+  const {root, table} = routeTable;
   const stack = createPushStack<FsmNode>({limit: 2});
 
   const getCurrnet = () => {
