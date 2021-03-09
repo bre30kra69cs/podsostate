@@ -1,7 +1,7 @@
 import {createLocker, Locker} from '../common/createLocker';
 import {FsmEvent} from './scheme';
 
-const sendOnceWrapper = (locker: Locker, send: (event: FsmEvent) => void) => {
+export const sendOnceWrapper = (locker: Locker, send: (event: FsmEvent) => void) => {
   const onceLocker = createLocker();
   onceLocker.unlock();
 
