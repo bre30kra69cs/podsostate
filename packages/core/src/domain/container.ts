@@ -17,7 +17,7 @@ export const createContainer = (routeTable: RouteTable): FsmContariner => {
   const stack = createPushStack<FsmNode>({limit: 2});
 
   const getCurrnet = () => {
-    return stack.head() as FsmNode;
+    return <FsmNode>stack.head();
   };
 
   const getPrev = () => {
@@ -26,7 +26,11 @@ export const createContainer = (routeTable: RouteTable): FsmContariner => {
 
   const getCurrentMap = () => {
     const current = getCurrnet();
-    return table.get(current) as FsmNodeTable;
+    return <FsmNodeTable>table.get(current);
+  };
+
+  const current = () => {
+    return getCurrnet();
   };
 
   const next = (event: FsmEvent) => {
@@ -76,7 +80,7 @@ export const createContainer = (routeTable: RouteTable): FsmContariner => {
   init();
 
   return {
-    current: getCurrnet,
+    current,
     next,
     set,
     isChanged,

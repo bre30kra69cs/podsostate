@@ -33,29 +33,41 @@ export const createEmitter = <T>() => {
   };
 };
 
+interface SilenceEmitter<I, O> {
+  subscribe: (subscriber: SilenceSubscriber<O>) => void;
+  unsubscribe: (subscriber: SilenceSubscriber<O>) => void;
+  emit: (payload: I) => void;
+}
+
+interface CreateSilenceEmitter {
+  <T>(): SilenceEmitter<T, T>;
+  <I, O>(convert: (data: I) => O): SilenceEmitter<I, O>;
+}
+
 export type SilenceSubscriber<T> = (payload: T) => void;
 
-export const createSilenceEmitter = <T>() => {
-  let subscribers: SilenceSubscriber<T>[] = [];
+export const createSilenceEmitter: CreateSilenceEmitter = <I, O>(convert?: (data: I) => O) => {
+  let subscribers: SilenceSubscriber<I | O>[] = [];
 
-  const clean = (subscriber: SilenceSubscriber<T>) => {
+  const clean = (subscriber: SilenceSubscriber<O>) => {
     subscribers = subscribers.filter(($subscriber) => {
       return $subscriber !== subscriber;
     });
   };
 
-  const subscribe = (subscriber: SilenceSubscriber<T>) => {
+  const subscribe = (subscriber: SilenceSubscriber<I | O>) => {
     clean(subscriber);
     subscribers.push(subscriber);
   };
 
-  const unsubscribe = (subscriber: SilenceSubscriber<T>) => {
+  const unsubscribe = (subscriber: SilenceSubscriber<O>) => {
     clean(subscriber);
   };
 
-  const emit = (payload: T) => {
+  const emit = (payload: I) => {
     subscribers.forEach(($subscriber) => {
-      $subscriber(payload);
+      const value = convert ? convert(payload) : payload;
+      $subscriber(value);
     });
   };
 

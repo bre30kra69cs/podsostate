@@ -57,11 +57,11 @@ export const parseRouteTable = (root: FsmScheme): RouteTable => {
     });
 
     current.states.forEach((state) => {
-      const stateNode = stateMapper.get(state) as FsmNode;
+      const stateNode = <FsmNode>stateMapper.get(state);
       const transitions = getTransitions(state, current.transitions);
-      const nodeMapper = mapper.get(stateNode) as FsmNodeTable;
+      const nodeMapper = <FsmNodeTable>mapper.get(stateNode);
       transitions.forEach(([, event, to]) => {
-        const toNode = stateMapper.get(to) as FsmNode;
+        const toNode = <FsmNode>stateMapper.get(to);
         nodeMapper.set(event, toNode);
       });
     });
@@ -71,18 +71,18 @@ export const parseRouteTable = (root: FsmScheme): RouteTable => {
       : [];
 
     current.states.forEach((state) => {
-      const stateNode = stateMapper.get(state) as FsmNode;
-      const nodeMapper = mapper.get(stateNode) as FsmNodeTable;
+      const stateNode = <FsmNode>stateMapper.get(state);
+      const nodeMapper = <FsmNodeTable>mapper.get(stateNode);
       outEvents.forEach((event) => {
         nodeMapper.set(event, currentNode);
       });
     });
 
-    const initNode = stateMapper.get(current.init) as FsmNode;
+    const initNode = <FsmNode>stateMapper.get(current.init);
     currentMapper.set(ToInit, initNode);
     current.states.forEach((state) => {
       if (isScheme(state)) {
-        const stateNode = stateMapper.get(state) as FsmNode;
+        const stateNode = <FsmNode>stateMapper.get(state);
         iter(state, stateNode, currentNode);
       }
     });
