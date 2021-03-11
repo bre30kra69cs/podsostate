@@ -1,6 +1,6 @@
 import {createLocker, Locker} from '../common/createLocker';
-import {sendOnceWrapper} from './taps';
-import {createEvent} from './scheme';
+import {sendOnceWrapper} from '../domain/taps';
+import {createEvent} from '../domain/scheme';
 
 let locker: Locker;
 
