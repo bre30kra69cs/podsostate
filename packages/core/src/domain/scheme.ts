@@ -1,9 +1,12 @@
-import {Locker} from '../common/createLocker';
-import {uniqArray} from '../utils/uniq';
+import {Locker} from '@podsostate/shared';
+import {uniqArray} from '@podsostate/shared';
 
-export interface FsmEvent {}
+export interface FsmEvent {
+  name?: string;
+}
 
 export interface FsmState {
+  name?: string;
   leave?: () => void;
   enter?: (locker: Locker, send: (event: FsmEvent) => void) => void;
 }
@@ -19,17 +22,15 @@ export interface FsmScheme {
   transitions: FsmTransition[];
 }
 
-export const createEvent = (): FsmEvent => {
-  return {};
+export const createEvent = (config?: FsmEvent): FsmEvent => {
+  return {
+    name: config?.name,
+  };
 };
 
-interface FsmStateConfig {
-  leave?: () => void;
-  enter?: (locker: Locker, send: (event: FsmEvent) => void) => void;
-}
-
-export const createState = (config?: FsmStateConfig): FsmState => {
+export const createState = (config?: FsmState): FsmState => {
   return {
+    name: config?.name,
     leave: config?.leave,
     enter: config?.enter,
   };

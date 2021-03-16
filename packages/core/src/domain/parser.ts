@@ -1,5 +1,5 @@
-import {createMapper, Mapper} from '../common/createMapper';
-import {createCounter} from '../common/createCounter';
+import {createMapper, Mapper} from '@podsostate/shared';
+import {createCounter} from '@podsostate/shared';
 import {
   createEvent,
   createState,

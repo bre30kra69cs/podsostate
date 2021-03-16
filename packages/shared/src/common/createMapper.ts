@@ -114,7 +114,7 @@ export const createArrayMapper = <K, V>(): Mapper<K, V[]> => {
   };
 };
 
-interface ReveerseMapper<K, V> extends Mapper<K, V> {
+export interface ReveerseMapper<K, V> extends Mapper<K, V> {
   getKey: (value: V) => K | undefined;
 }
 

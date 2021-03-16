@@ -1,4 +1,4 @@
-import {createLocker, Locker} from '../common/createLocker';
+import {createLocker, Locker} from '@podsostate/shared';
 import {FsmEvent} from './scheme';
 
 export const sendOnceWrapper = (locker: Locker, send: (event: FsmEvent) => void) => {

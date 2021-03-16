@@ -1,6 +1,6 @@
+import {wait} from '@podsostate/shared';
 import {createEvent, createScheme, createState} from '../domain/scheme';
 import {createMachine} from '../domain/machine';
-import {wait} from '../utils/wait';
 
 test('unschemed transition', () => {
   const ToLoading = createEvent();

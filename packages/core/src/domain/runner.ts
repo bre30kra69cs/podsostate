@@ -1,4 +1,4 @@
-import {createLocker} from '../common/createLocker';
+import {createLocker} from '@podsostate/shared';
 import {FsmState, FsmEvent} from './scheme';
 import {FsmNode} from './parser';
 

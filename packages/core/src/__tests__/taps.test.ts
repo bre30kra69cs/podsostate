@@ -1,4 +1,4 @@
-import {createLocker, Locker} from '../common/createLocker';
+import {createLocker, Locker} from '@podsostate/shared';
 import {sendOnceWrapper} from '../domain/taps';
 import {createEvent} from '../domain/scheme';
 

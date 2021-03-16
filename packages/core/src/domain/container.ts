@@ -1,4 +1,4 @@
-import {createPushStack} from '../common/createStack';
+import {createPushStack} from '@podsostate/shared';
 import {isScheme as isSchemeGuard, RouteTable, FsmNode, FsmNodeTable} from './parser';
 import {FsmEvent} from './scheme';
 

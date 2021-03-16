@@ -4,12 +4,14 @@
     "target": "ESNext",
     "module": "CommonJS",
     "moduleResolution": "Node",
+    "outDir": "build",
     "allowJs": false,
     "esModuleInterop": true,
-    "noEmit": true,
     "skipLibCheck": true,
-    "strict": true
+    "strict": true,
+    "declaration": true,
+    "declarationDir": "typings"
   },
   "exclude": ["node_modules"],
-  "include": ["packages"]
+  "include": ["src"]
 }

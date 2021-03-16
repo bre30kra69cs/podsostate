@@ -1,10 +1,11 @@
 {
-  "name": "@podsostate/core",
+  "name": "@podsostate/shared",
   "version": "0.1.0",
-  "description": "Podsostate core",
+  "description": "Podsostate shared",
   "author": "Andrey Krasovsky <an.krasowsckij@gmail.com>",
   "license": "MIT",
-  "main": "src/index.ts",
+  "main": "build/index.js",
+  "types": "typings/index.d.ts",
   "scripts": {
     "build": "npm run clean && npm run compile",
     "compile": "npx tsc",

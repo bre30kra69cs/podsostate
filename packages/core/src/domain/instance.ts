@@ -1,5 +1,5 @@
-import {createSilenceEmitter, SilenceSubscriber} from '../common/createEmitter';
-import {createStack} from '../common/createStack';
+import {createSilenceEmitter, SilenceSubscriber} from '@podsostate/shared';
+import {createStack} from '@podsostate/shared';
 import {FsmNode, ToInit} from './parser';
 import {FsmEvent, FsmState, FsmSchemeOrState} from './scheme';
 import {FsmContariner} from './container';
