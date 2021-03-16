@@ -74,3 +74,17 @@ test('top-bottom-top transitions', () => {
   machine.send(ToGlobalEnd);
   expect(machine.current()).toEqual(GLOBAL_END);
 });
+
+test('top-bottom-top cutted transitions', () => {
+  expect(machine.current()).toEqual(GLOBAL_INIT);
+  machine.send(ToGlobalMiddle);
+  expect(machine.current()).toEqual(LOCAL_INIT);
+  machine.send(ToLocalMiddle);
+  expect(machine.current()).toEqual(DEEP_INIT);
+  machine.send(ToDeepMiddle);
+  expect(machine.current()).toEqual(DEEP_MIDDLE);
+  machine.send(ToLocalEnd);
+  expect(machine.current()).toEqual(LOCAL_END);
+  machine.send(ToGlobalEnd);
+  expect(machine.current()).toEqual(GLOBAL_END);
+});
