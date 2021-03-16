@@ -1,8 +1,13 @@
 import {Locker} from '@podsostate/shared';
 import {uniqArray} from '@podsostate/shared';
 
+export interface FsmEventConfig {
+  name?: string;
+}
+
 export interface FsmEvent {
   name?: string;
+  isLib: boolean;
 }
 
 export interface FsmState {
@@ -16,15 +21,24 @@ export type FsmSchemeOrState = FsmScheme | FsmState;
 export type FsmTransition = [FsmSchemeOrState, FsmEvent, FsmSchemeOrState];
 
 export interface FsmScheme {
+  name?: string;
   init: FsmSchemeOrState;
   events: FsmEvent[];
   states: FsmSchemeOrState[];
   transitions: FsmTransition[];
 }
 
-export const createEvent = (config?: FsmEvent): FsmEvent => {
+export const createEvent = (config?: FsmEventConfig): FsmEvent => {
   return {
     name: config?.name,
+    isLib: false,
+  };
+};
+
+export const createLibEvent = (config?: FsmEventConfig): FsmEvent => {
+  return {
+    name: config?.name,
+    isLib: true,
   };
 };
 
@@ -36,7 +50,8 @@ export const createState = (config?: FsmState): FsmState => {
   };
 };
 
-interface FsmSchemeConfig {
+export interface FsmSchemeConfig {
+  name?: string;
   init: FsmSchemeOrState;
   transitions?: FsmTransition[];
 }
@@ -52,6 +67,7 @@ export const createScheme = (config: FsmSchemeConfig): FsmScheme => {
       return uniqArray(acc, [event]);
     }, [] as FsmEvent[]) ?? [];
   return {
+    name: config.name,
     init: config.init,
     events,
     states,

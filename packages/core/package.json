@@ -4,7 +4,8 @@
   "description": "Podsostate core",
   "author": "Andrey Krasovsky <an.krasowsckij@gmail.com>",
   "license": "MIT",
-  "main": "src/index.ts",
+  "main": "build/index.js",
+  "types": "typings/index.d.ts",
   "scripts": {
     "build": "npm run clean && npm run compile",
     "compile": "npx tsc",

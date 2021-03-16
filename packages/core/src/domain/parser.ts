@@ -1,7 +1,7 @@
 import {createMapper, Mapper} from '@podsostate/shared';
 import {createCounter} from '@podsostate/shared';
 import {
-  createEvent,
+  createLibEvent,
   createState,
   FsmScheme,
   FsmEvent,
@@ -33,13 +33,17 @@ export const isScheme = (value?: any): value is FsmScheme => {
   return !!value.init;
 };
 
-export const ToInit = createEvent();
+export const ToInit = createLibEvent({
+  name: 'ToInit',
+});
 
 export type FsmNodeTable = Mapper<FsmEvent, FsmNode>;
 
+export type FsmParsedTable = Mapper<FsmNode, FsmNodeTable>;
+
 export interface RouteTable {
   root: FsmNode;
-  table: Mapper<FsmNode, FsmNodeTable>;
+  table: FsmParsedTable;
 }
 
 export const parseRouteTable = (root: FsmScheme): RouteTable => {
